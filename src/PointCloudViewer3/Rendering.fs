@@ -8,7 +8,8 @@ open Aardvark.Geometry.Points
 module Lod =
     
     type OctreeILodDataNode( globalCenter : V3d, node : PersistentRef<PointSetNode>, level : int ) =
-        member x.Id = node.Value :> obj
+        member x.Identifier = node.Value.Id
+        member x.Node = node.Value :> obj
         member x.Level = level
         member x.Bounds = node.Value.BoundingBox - globalCenter
         member x.LocalPointCount = node.Value.LodPointCount
@@ -26,8 +27,14 @@ module Lod =
             else
                 None
 
+        override x.GetHashCode() = x.Identifier.GetHashCode()
+        override x.Equals o =
+            match o with
+                | :? OctreeILodDataNode as o -> x.Identifier = o.Identifier
+                | _ -> false
+
         interface ILodDataNode with
-            member x.Id = x.Id
+            member x.Id = x.Node
             member x.Level = level
             member x.Bounds = x.Bounds
             member x.LocalPointCount = x.LocalPointCount
@@ -36,16 +43,7 @@ module Lod =
     type OctreeLodData(ps : PointSet) =
         
         let globalCenter = ps.BoundingBox.Center
-
-        //do
-        //    let a = Array.zeroCreate 23905782
-        //    let mutable i = 0
-        //    ps.Root.Value.ForEachNode(true, (fun n -> 
-        //            i <- i+1
-        //            a.[i] <- n 
-        //        ) 
-        //    )
-
+        
         let root = lazy ( OctreeILodDataNode(globalCenter, ps.Root,0) :> ILodDataNode )
 
 

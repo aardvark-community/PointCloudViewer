@@ -71,7 +71,6 @@ module Main =
 
         let pss = Mod.init 3.0
     
-
         let bboxSg =
             ps.BoundingBox
                 |> Sg.wireBox' C4b.Red
@@ -82,9 +81,7 @@ module Main =
                     do! DefaultSurfaces.vertexColor
                 }
                 |> Sg.uniform "LineWidth" (Mod.constant 5.0)
-
-        
-
+                
         let pcsg = 
             Sg.pointCloud data info
                 |> Sg.surface pointCloudSurface
@@ -120,6 +117,29 @@ module Main =
                 |> Sg.viewTrafo viewTrafo
                 |> Sg.projTrafo projTrafo
                 
+        win.Keyboard.Down.Values.Add ( fun k ->
+            match k with
+            | Keys.U -> 
+                transact ( fun _ -> tpd.Value <- tpd.Value * 1.5)
+                Log.line "TargetPixelDistance: %f" tpd.Value
+            | Keys.I -> 
+                transact ( fun _ -> tpd.Value <- tpd.Value / 1.5)
+                Log.line "TargetPixelDistance: %f" tpd.Value
+            | Keys.O -> 
+                transact ( fun _ -> pss.Value <- pss.Value * 1.5)
+                Log.line "PointSize: %f" pss.Value
+            | Keys.P -> 
+                transact ( fun _ -> pss.Value <- pss.Value / 1.5)
+                Log.line "PointSize: %f" pss.Value
+            | Keys.K -> 
+                transact ( fun _ -> speed.Value <- speed.Value * 1.5)
+                Log.line "CameraSpeed: %f" speed.Value
+            | Keys.L -> 
+                transact ( fun _ -> speed.Value <- speed.Value / 1.5)
+                Log.line "CameraSpeed: %f" speed.Value
+            | _ -> ()
+        )
+
         win.RenderTask <- (app.Runtime.CompileRender(win.FramebufferSignature, sg))
         win.Run()
 
