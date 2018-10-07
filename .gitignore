@@ -15,3 +15,4 @@ bin/Debug
 /.paket/Paket.Restore.targets
 /test.store
 /src/PointCloudViewer3/Properties/launchSettings.json
+/pub

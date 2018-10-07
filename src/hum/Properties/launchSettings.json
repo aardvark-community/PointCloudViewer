@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PointCloudViewer3": {
+      "commandName": "Project",
+      "commandLineArgs": "show ..\\..\\..\\test.store statue"
+    }
+  }
+}
