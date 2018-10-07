@@ -13,3 +13,5 @@ bin/Debug
 /.paket/paket.exe
 /Aardvark.log
 /.paket/Paket.Restore.targets
+/test.store
+/src/PointCloudViewer3/Properties/launchSettings.json

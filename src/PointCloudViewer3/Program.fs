@@ -12,26 +12,23 @@ open Aardvark.Data.Points
 open Aardvark.Data.Points.Import
 open Uncodium.SimpleStore
 
-
-
 module Main = 
+    open System.Threading
 
-    [<EntryPoint;STAThread>]
-    let main argv = 
+    let usage () =
+        Log.line "usage: hum <command> <args...>"
+        Log.line "    show <store> <id>               shows pointcloud with given <id> in given <store>"
+        Log.line "    info <filename>                 prints info (e.g. point count, bounding box, ...)"
+        Log.line "    import <filename> <store> <id>  imports <filename> into <store> with <id>"
+        Log.line "        [-mindist <dist>]                skips points on import, which are less than"
+        Log.line "                                         given distance from previous point, e.g. -mindist 0.001"
 
-        let store = PointCloud.OpenStore(@"D:\store15")
+    let show (store : string) (id : string) (argv : string[]) =
 
-        let cfg =
-            ImportConfig.Default
-                .WithStorage(store)
-                .WithRandomKey()
-                .WithVerbose(true)
-                .WithMaxDegreeOfParallelism(1)
-                .WithMinDist(0.005)
-        
-        let cs = Import.Pts.Chunks(@"D:\pts\JBs_Haus.pts",cfg)
-        let ps = PointCloud.Chunks(cs, cfg)
-
+        Log.line "%s" Environment.CurrentDirectory
+        Log.line "%s" (System.IO.Path.GetFullPath(store))
+        let store = PointCloud.OpenStore(store)
+        let ps = store.GetPointSet(id, CancellationToken.None)
         let data = Lod.OctreeLodData(ps)
 
         Ag.initialize()
@@ -142,5 +139,58 @@ module Main =
 
         win.RenderTask <- (app.Runtime.CompileRender(win.FramebufferSignature, sg))
         win.Run()
+
+    let info (filename : string) (argv : string[]) =
+        let info = PointCloud.ParseFileInfo(filename, ImportConfig.Default)
+        Console.WriteLine("filename      {0}", info.FileName)
+        Console.WriteLine("format        {0}", info.Format.Description)
+        Console.WriteLine("file size     {0:N0} bytes", info.FileSizeInBytes)
+        Console.WriteLine("point count   {0:N0}", info.PointCount)
+        Console.WriteLine("bounds        {0}", info.Bounds)
+
+    let import (filename : string) (store : string) (id : string) (argv : string[]) =
+
+        let mutable minDist = 0.0
+
+        let mutable i = 0
+        while i < argv.Length do
+            match argv.[i] with
+            | "-md"
+            | "-mindist" -> minDist <- Double.Parse(argv.[i + 1])
+            | _ -> failwith (sprintf "unknown argument %s" argv.[i])
+
+        use store = PointCloud.OpenStore(store)
+
+        let cfg =
+            ImportConfig.Default
+                .WithStorage(store)
+                .WithKey(id)
+                .WithVerbose(true)
+                .WithMinDist(minDist)
+        
+        let ps = PointCloud.Import(filename, cfg)
+
+        Console.WriteLine("point count   {0:N0}", ps.PointCount)
+        Console.WriteLine("bounds        {0}", ps.BoundingBox)
+
+    let processArgs (argv : string[]) =
+        try
+            match argv.[0] with
+            | "show"   -> show argv.[1] argv.[2] (Array.skip 3 argv)
+            | "info"   -> info argv.[1] (Array.skip 2 argv)
+            | "import" -> import argv.[1] argv.[2] argv.[3] (Array.skip 4 argv)
+            | _        -> usage ()
+        with e ->
+            Log.line "%A" e
+            usage ()
+
+    [<EntryPoint;STAThread>]
+    let main argv = 
+    
+        Import.Pts.PtsFormat |> ignore
+        Import.E57.E57Format |> ignore
+        Import.Yxh.YxhFormat |> ignore
+
+        processArgs argv
 
         0

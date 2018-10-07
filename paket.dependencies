@@ -15,14 +15,15 @@ nuget Aardvark.Application.Slim             ~> 4.4.1
 nuget Aardvark.Application.Slim.GL          ~> 4.4.1
 nuget Aardvark.Application.Slim.Vulkan      ~> 4.4.1
                                             
-nuget Aardvark.Data.E57                 ~> 4.1.0-prerelease3
-nuget Aardvark.Geometry.PointTree       ~> 4.1.0-prerelease3
-nuget Aardvark.Geometry.PointSet        ~> 4.1.0-prerelease3
-nuget Aardvark.Data.Points.Ascii        ~> 4.1.0-prerelease3
+nuget Aardvark.Data.E57                     ~> 4.1.0-prerelease3
+nuget Aardvark.Geometry.PointTree           ~> 4.1.0-prerelease3
+nuget Aardvark.Geometry.PointSet            ~> 4.1.0-prerelease3
+nuget Aardvark.Data.Points.Ascii            ~> 4.1.0-prerelease3
 
+//nuget LASzip                                ~> 0.2.0-prerelease1
 
 group Build
-framework: net45
+framework: net471
 content: none
 source https://api.nuget.org/v3/index.json
 
