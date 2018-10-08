@@ -1,0 +1,1 @@
+dotnet publish src\hum.sln -o ..\..\pub --self-contained -f netcoreapp2.0 -r win7-x64
