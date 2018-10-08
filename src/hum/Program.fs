@@ -14,6 +14,7 @@ open Aardvark.Data.Points.Import
 open Uncodium.SimpleStore
 
 module Main = 
+    open Newtonsoft.Json.Linq
 
     let usage () =
         Log.line "usage: hum <command> <args...>"
@@ -23,13 +24,34 @@ module Main =
         Log.line "        [-mindist <dist>]                skips points on import, which are less than"
         Log.line "                                         given distance from previous point, e.g. -mindist 0.001"
 
+    let parseBounds filename =
+        let json = JArray.Parse(File.readAllText filename) :> seq<JToken>
+        json
+            |> Seq.map (fun j -> Box3d.Parse(j.["Bounds"].ToObject<string>()))
+            |> Array.ofSeq
+
     let show (store : string) (id : string) (argv : string[]) =
 
-        Log.line "%s" Environment.CurrentDirectory
-        Log.line "%s" (System.IO.Path.GetFullPath(store))
+        let mutable showBoundsFileName = None
+        let mutable i = 0
+        while i < argv.Length do
+            match argv.[i] with
+            | "-sb" -> showBoundsFileName <- Some argv.[i + 1]
+                       i <- i + 1
+            | _ -> failwith (sprintf "unknown argument %s" argv.[i])
+
+            i <- i + 1
+            
+
+        let boundsToShow =
+            match showBoundsFileName with
+            | Some filename -> parseBounds filename
+            | None -> [| |]
+            
         let store = PointCloud.OpenStore(store)
         let ps = store.GetPointSet(id, CancellationToken.None)
         let data = Lod.OctreeLodData(ps)
+        let center = ps.BoundingBox.Center
 
         Ag.initialize()
         Aardvark.Init()
@@ -41,7 +63,7 @@ module Main =
         let view = initialView |> DefaultCameraController.controlWithSpeed speed win.Mouse win.Keyboard win.Time
         let viewTrafo = view |> Mod.map CameraView.viewTrafo
 
-        let proj = win.Sizes |> Mod.map (fun s -> Frustum.perspective 60.0 0.1 1000.0 (float s.X / float s.Y))
+        let proj = win.Sizes |> Mod.map (fun s -> Frustum.perspective 60.0 1.0 50000.0 (float s.X / float s.Y))
         let projTrafo = proj |> Mod.map Frustum.projTrafo
         
         let tpd = Mod.init 1.5
@@ -108,12 +130,46 @@ module Main =
                     }
 
             [cross; box] |> Sg.ofList
+
+        // show bounding boxes (-sb)
+        let c = center - V3d(0.0, 0.0, 50.0)
+        let box2lines (box : Box3d) =
+            [|
+                Line3d(V3d(box.Min.X, box.Min.Y, box.Min.Z) - c, V3d(box.Max.X, box.Min.Y, box.Min.Z) - c);
+                Line3d(V3d(box.Max.X, box.Min.Y, box.Min.Z) - c, V3d(box.Max.X, box.Max.Y, box.Min.Z) - c);
+                Line3d(V3d(box.Max.X, box.Max.Y, box.Min.Z) - c, V3d(box.Min.X, box.Max.Y, box.Min.Z) - c);
+                Line3d(V3d(box.Min.X, box.Max.Y, box.Min.Z) - c, V3d(box.Min.X, box.Min.Y, box.Min.Z) - c);
+                                                                                                        
+                Line3d(V3d(box.Min.X, box.Min.Y, box.Max.Z) - c, V3d(box.Max.X, box.Min.Y, box.Max.Z) - c);
+                Line3d(V3d(box.Max.X, box.Min.Y, box.Max.Z) - c, V3d(box.Max.X, box.Max.Y, box.Max.Z) - c);
+                Line3d(V3d(box.Max.X, box.Max.Y, box.Max.Z) - c, V3d(box.Min.X, box.Max.Y, box.Max.Z) - c);
+                Line3d(V3d(box.Min.X, box.Max.Y, box.Max.Z) - c, V3d(box.Min.X, box.Min.Y, box.Max.Z) - c);
+                                                                                                        
+                Line3d(V3d(box.Min.X, box.Min.Y, box.Min.Z) - c, V3d(box.Min.X, box.Min.Y, box.Max.Z) - c);
+                Line3d(V3d(box.Max.X, box.Min.Y, box.Min.Z) - c, V3d(box.Max.X, box.Min.Y, box.Max.Z) - c);
+                Line3d(V3d(box.Max.X, box.Max.Y, box.Min.Z) - c, V3d(box.Max.X, box.Max.Y, box.Max.Z) - c);
+                Line3d(V3d(box.Min.X, box.Max.Y, box.Min.Z) - c, V3d(box.Min.X, box.Max.Y, box.Max.Z) - c)
+            |]
+        let wireBoxes (boxes : Box3d[]) = boxes |> Array.collect box2lines
+        let boundsToShowCorrected = Mod.constant (wireBoxes boundsToShow)
+        let boundsToShowSg =
+            boundsToShowCorrected
+            |> Sg.lines (Mod.constant C4b.Gray)
+            |> Sg.shader {
+                do! DefaultSurfaces.trafo
+                do! DefaultSurfaces.thickLine
+                do! DefaultSurfaces.vertexColor
+            }
+            |> Sg.uniform "LineWidth" (Mod.constant 1.0)
+
+        // scene graph
         let sg = 
-            [pcsg; bboxSg; coordinateCross] 
+            [pcsg; bboxSg; boundsToShowSg] // coordinateCross
                 |> Sg.ofList
                 |> Sg.viewTrafo viewTrafo
                 |> Sg.projTrafo projTrafo
-                
+        
+        // keyboard bindings
         win.Keyboard.Down.Values.Add ( fun k ->
             match k with
             | Keys.U -> 
@@ -157,7 +213,10 @@ module Main =
             match argv.[i] with
             | "-md"
             | "-mindist" -> minDist <- Double.Parse(argv.[i + 1])
+                            i <- i + 1
             | _ -> failwith (sprintf "unknown argument %s" argv.[i])
+
+            i <- i + 1
 
         use store = PointCloud.OpenStore(store)
 
