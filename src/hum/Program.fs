@@ -246,10 +246,16 @@ module Main =
     [<EntryPoint;STAThread>]
     let main argv = 
     
-        Log.line "current dir: %s" Environment.CurrentDirectory
-        Log.line "cmdline    : %s" Environment.CommandLine
-
-
+        Console.ForegroundColor <- ConsoleColor.White
+        Console.Write("A viewer for ")
+        Console.ForegroundColor <- ConsoleColor.Yellow
+        Console.Write("hum")
+        Console.ForegroundColor <- ConsoleColor.White
+        Console.WriteLine("ongous point clouds.")
+        Console.WriteLine("Copyright (c) 2018. Attila Szabo, Georg Haaser, Harald Steinlechner, Stefan Maierhofer.")
+        Console.WriteLine("GNU AFFERO GENERAL PUBLIC LICENSE.")
+        Console.ResetColor()
+        
         Import.Pts.PtsFormat |> ignore
         Import.E57.E57Format |> ignore
         Import.Yxh.YxhFormat |> ignore
