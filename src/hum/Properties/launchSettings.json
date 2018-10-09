@@ -2,7 +2,7 @@
   "profiles": {
     "PointCloudViewer3": {
       "commandName": "Project",
-      "commandLineArgs": "show \"\\\\space\\Backup\\VRVis\\KoelnCells\\cells\\3269_5518_0_10\\pointcloud\" 3269_5518_0_10 -sb c:\\Data\\meta.json "
+      "commandLineArgs": "show c:\\Data\\test test"
     }
   }
 }

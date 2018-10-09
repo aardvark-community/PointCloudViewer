@@ -5,25 +5,25 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\..\bin\Debug</OutputPath>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>..\..\bin\Release</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <RunWorkingDirectory>$(OutputPath)\netcoreapp2.0</RunWorkingDirectory>
-    <AssemblyName>hum</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-
-    <Compile Include="Shader.fs" />
-
-    <Compile Include="Rendering.fs" />
-
+	<Compile Include="Model.fs" />
+	<Compile Include="Model.g.fs" />
+	<Compile Include="App.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="paket.references" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\hum\hum.fsproj" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

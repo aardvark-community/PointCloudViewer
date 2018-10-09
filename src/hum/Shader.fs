@@ -92,17 +92,6 @@ module Surfaces =
             BillboardFragment  |> toEffect
         ]
 
-module internal Surface =
-
-    let compiled (app : IApplication) (signature : IFramebufferSignature) (effect : FShadeEffect) =
-        app.Runtime.PrepareSurface(signature, toFShadeSurface effect) :> ISurface
-        //app.Runtime.PrepareSurface(signature, FShadeSurface.Get effect) :> ISurface
-    
-    let compiled' (app : IApplication) (signature : IFramebufferSignature) (effects : seq<FShadeEffect>) =
-        let composite = Effect.compose effects
-        compiled app signature composite
-
-    let pointSpriteSurface app runtime = Surfaces.pointsprite |> compiled' app runtime
 
 
 module Util =

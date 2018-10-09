@@ -26,6 +26,113 @@ open Aardvark.Data.Points
 open Aardvark.Data.Points.Import
 open Uncodium.SimpleStore
 
+module Scene =
+        
+    let createSceneGraph (ps : PointSet) (boundsToShow : Box3d[]) : ISg =
+
+        let data = Lod.OctreeLodData(ps)
+        let center = ps.BoundingBox.Center
+
+        let pss = Mod.init 3.0
+        let tpd = Mod.init 1.5
+        let rasterizer = tpd |> Mod.map LodData.defaultRasterizeSet
+        
+        let info = {
+            lodRasterizer           = rasterizer
+            attributeTypes = 
+                Map.ofList [
+                    DefaultSemantic.Positions, typeof<V4f>
+                    DefaultSemantic.Colors, typeof<C4b>
+                ]
+            freeze                  = Mod.constant false
+            maxReuseRatio           = 0.5
+            minReuseCount           = 1L <<< 20
+            pruneInterval           = 500
+            customView              = None
+            customProjection        = None
+            boundingBoxSurface      = None
+            progressCallback        = None
+        }
+    
+        let bboxSg =
+            ps.BoundingBox
+                |> Sg.wireBox' C4b.Red
+                |> Sg.trafo (Trafo3d.Translation(-ps.BoundingBox.Center) |> Mod.constant)
+                |> Sg.shader {
+                    do! DefaultSurfaces.trafo
+                    do! DefaultSurfaces.thickLine
+                    do! DefaultSurfaces.vertexColor
+                }
+                |> Sg.uniform "LineWidth" (Mod.constant 5.0)
+                
+        let pcsg = 
+            Sg.pointCloud data info
+                |> Sg.effect Surfaces.pointsprite
+                |> Sg.uniform "PointSize" pss
+                //|> Sg.uniform "ViewportSize" win.Sizes TODO
+
+        let coordinateCross = 
+            let cross =
+                IndexedGeometryPrimitives.coordinateCross (V3d.III * 2.0)
+                    |> Sg.ofIndexedGeometry
+                    |> Sg.translate -6.0 -6.0 -6.0
+                    |> Sg.shader {
+                        do! DefaultSurfaces.trafo
+                        do! DefaultSurfaces.thickLine
+                        do! DefaultSurfaces.vertexColor
+                    }
+                    |> Sg.uniform "LineWidth" (Mod.constant 2.0)
+
+
+            let box =
+                Util.coordinateBox 500.0
+                    |> List.map Sg.ofIndexedGeometry
+                    |> Sg.ofList
+                    |> Sg.shader {
+                        do! DefaultSurfaces.trafo
+                        do! DefaultSurfaces.vertexColor
+                    }
+
+            [cross; box] |> Sg.ofList
+
+        // show bounding boxes (-sb)
+        let c = center - V3d(0.0, 0.0, 50.0)
+        let box2lines (box : Box3d) =
+            [|
+                Line3d(V3d(box.Min.X, box.Min.Y, box.Min.Z) - c, V3d(box.Max.X, box.Min.Y, box.Min.Z) - c);
+                Line3d(V3d(box.Max.X, box.Min.Y, box.Min.Z) - c, V3d(box.Max.X, box.Max.Y, box.Min.Z) - c);
+                Line3d(V3d(box.Max.X, box.Max.Y, box.Min.Z) - c, V3d(box.Min.X, box.Max.Y, box.Min.Z) - c);
+                Line3d(V3d(box.Min.X, box.Max.Y, box.Min.Z) - c, V3d(box.Min.X, box.Min.Y, box.Min.Z) - c);
+                                                                                                        
+                Line3d(V3d(box.Min.X, box.Min.Y, box.Max.Z) - c, V3d(box.Max.X, box.Min.Y, box.Max.Z) - c);
+                Line3d(V3d(box.Max.X, box.Min.Y, box.Max.Z) - c, V3d(box.Max.X, box.Max.Y, box.Max.Z) - c);
+                Line3d(V3d(box.Max.X, box.Max.Y, box.Max.Z) - c, V3d(box.Min.X, box.Max.Y, box.Max.Z) - c);
+                Line3d(V3d(box.Min.X, box.Max.Y, box.Max.Z) - c, V3d(box.Min.X, box.Min.Y, box.Max.Z) - c);
+                                                                                                        
+                Line3d(V3d(box.Min.X, box.Min.Y, box.Min.Z) - c, V3d(box.Min.X, box.Min.Y, box.Max.Z) - c);
+                Line3d(V3d(box.Max.X, box.Min.Y, box.Min.Z) - c, V3d(box.Max.X, box.Min.Y, box.Max.Z) - c);
+                Line3d(V3d(box.Max.X, box.Max.Y, box.Min.Z) - c, V3d(box.Max.X, box.Max.Y, box.Max.Z) - c);
+                Line3d(V3d(box.Min.X, box.Max.Y, box.Min.Z) - c, V3d(box.Min.X, box.Max.Y, box.Max.Z) - c)
+            |]
+        let wireBoxes (boxes : Box3d[]) = boxes |> Array.collect box2lines
+        let boundsToShowCorrected = Mod.constant (wireBoxes boundsToShow)
+        let boundsToShowSg =
+            boundsToShowCorrected
+            |> Sg.lines (Mod.constant C4b.Gray)
+            |> Sg.shader {
+                do! DefaultSurfaces.trafo
+                do! DefaultSurfaces.thickLine
+                do! DefaultSurfaces.vertexColor
+            }
+            |> Sg.uniform "LineWidth" (Mod.constant 1.0)
+
+        // scene graph
+        let sg = 
+            [pcsg; bboxSg; boundsToShowSg] // coordinateCross
+                |> Sg.ofList
+                    
+        sg
+
 module Main = 
     open Newtonsoft.Json.Linq
 
@@ -42,6 +149,7 @@ module Main =
         json
             |> Seq.map (fun j -> Box3d.Parse(j.["Bounds"].ToObject<string>()))
             |> Array.ofSeq
+
 
     let show (store : string) (id : string) (argv : string[]) =
 
@@ -99,8 +207,6 @@ module Main =
             boundingBoxSurface      = None
             progressCallback        = None
         }
-        
-        let pointCloudSurface = Surface.pointSpriteSurface app win.FramebufferSignature
 
         let pss = Mod.init 3.0
     
@@ -117,7 +223,7 @@ module Main =
                 
         let pcsg = 
             Sg.pointCloud data info
-                |> Sg.surface pointCloudSurface
+                |> Sg.effect Surfaces.pointsprite
                 |> Sg.uniform "PointSize" pss
                 |> Sg.uniform "ViewportSize" win.Sizes
 
