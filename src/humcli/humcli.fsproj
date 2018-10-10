@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,19 +8,15 @@
     <OutputPath>..\..\bin\Debug\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\..\bin\Release</OutputPath>
+    <OutputPath>..\..\bin\Release\</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <RunWorkingDirectory>$(OutputPath)\netcoreapp2.0</RunWorkingDirectory>
+    <AssemblyName>humcli</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-	<Compile Include="Model.fs" />
-	<Compile Include="Model.g.fs" />
-	<Compile Include="App.fs" />
-    <Compile Include="Program.fs" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="paket.references" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\hum\hum.fsproj" />

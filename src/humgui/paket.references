@@ -11,6 +11,12 @@ Aardvark.Application.Slim.Vulkan
 Aardvark.SceneGraph
 Aardvark.SceneGraph.IO
 
+Aardvark.Service
+Aardvark.UI
+Aardvark.UI.Primitives
+Aardvark.Compiler.DomainTypes.MSBuild
+Aardium
+
 Aardvark.Data.E57          
 Aardvark.Geometry.PointTree
 Aardvark.Geometry.PointSet 

@@ -24,132 +24,30 @@ open Aardvark.Application.Slim
 open Aardvark.Geometry.Points
 open Aardvark.Data.Points
 open Aardvark.Data.Points.Import
+open Newtonsoft.Json.Linq
 open Uncodium.SimpleStore
 
-module Scene =
-        
-    let createSceneGraph (ps : PointSet) (boundsToShow : Box3d[]) : ISg =
-
-        let data = Lod.OctreeLodData(ps)
-        let center = ps.BoundingBox.Center
-
-        let pss = Mod.init 3.0
-        let tpd = Mod.init 1.5
-        let rasterizer = tpd |> Mod.map LodData.defaultRasterizeSet
-        
-        let info = {
-            lodRasterizer           = rasterizer
-            attributeTypes = 
-                Map.ofList [
-                    DefaultSemantic.Positions, typeof<V4f>
-                    DefaultSemantic.Colors, typeof<C4b>
-                ]
-            freeze                  = Mod.constant false
-            maxReuseRatio           = 0.5
-            minReuseCount           = 1L <<< 20
-            pruneInterval           = 500
-            customView              = None
-            customProjection        = None
-            boundingBoxSurface      = None
-            progressCallback        = None
-        }
-    
-        let bboxSg =
-            ps.BoundingBox
-                |> Sg.wireBox' C4b.Red
-                |> Sg.trafo (Trafo3d.Translation(-ps.BoundingBox.Center) |> Mod.constant)
-                |> Sg.shader {
-                    do! DefaultSurfaces.trafo
-                    do! DefaultSurfaces.thickLine
-                    do! DefaultSurfaces.vertexColor
-                }
-                |> Sg.uniform "LineWidth" (Mod.constant 5.0)
-                
-        let pcsg = 
-            Sg.pointCloud data info
-                |> Sg.effect Surfaces.pointsprite
-                |> Sg.uniform "PointSize" pss
-                //|> Sg.uniform "ViewportSize" win.Sizes TODO
-
-        let coordinateCross = 
-            let cross =
-                IndexedGeometryPrimitives.coordinateCross (V3d.III * 2.0)
-                    |> Sg.ofIndexedGeometry
-                    |> Sg.translate -6.0 -6.0 -6.0
-                    |> Sg.shader {
-                        do! DefaultSurfaces.trafo
-                        do! DefaultSurfaces.thickLine
-                        do! DefaultSurfaces.vertexColor
-                    }
-                    |> Sg.uniform "LineWidth" (Mod.constant 2.0)
-
-
-            let box =
-                Util.coordinateBox 500.0
-                    |> List.map Sg.ofIndexedGeometry
-                    |> Sg.ofList
-                    |> Sg.shader {
-                        do! DefaultSurfaces.trafo
-                        do! DefaultSurfaces.vertexColor
-                    }
-
-            [cross; box] |> Sg.ofList
-
-        // show bounding boxes (-sb)
-        let c = center - V3d(0.0, 0.0, 50.0)
-        let box2lines (box : Box3d) =
-            [|
-                Line3d(V3d(box.Min.X, box.Min.Y, box.Min.Z) - c, V3d(box.Max.X, box.Min.Y, box.Min.Z) - c);
-                Line3d(V3d(box.Max.X, box.Min.Y, box.Min.Z) - c, V3d(box.Max.X, box.Max.Y, box.Min.Z) - c);
-                Line3d(V3d(box.Max.X, box.Max.Y, box.Min.Z) - c, V3d(box.Min.X, box.Max.Y, box.Min.Z) - c);
-                Line3d(V3d(box.Min.X, box.Max.Y, box.Min.Z) - c, V3d(box.Min.X, box.Min.Y, box.Min.Z) - c);
-                                                                                                        
-                Line3d(V3d(box.Min.X, box.Min.Y, box.Max.Z) - c, V3d(box.Max.X, box.Min.Y, box.Max.Z) - c);
-                Line3d(V3d(box.Max.X, box.Min.Y, box.Max.Z) - c, V3d(box.Max.X, box.Max.Y, box.Max.Z) - c);
-                Line3d(V3d(box.Max.X, box.Max.Y, box.Max.Z) - c, V3d(box.Min.X, box.Max.Y, box.Max.Z) - c);
-                Line3d(V3d(box.Min.X, box.Max.Y, box.Max.Z) - c, V3d(box.Min.X, box.Min.Y, box.Max.Z) - c);
-                                                                                                        
-                Line3d(V3d(box.Min.X, box.Min.Y, box.Min.Z) - c, V3d(box.Min.X, box.Min.Y, box.Max.Z) - c);
-                Line3d(V3d(box.Max.X, box.Min.Y, box.Min.Z) - c, V3d(box.Max.X, box.Min.Y, box.Max.Z) - c);
-                Line3d(V3d(box.Max.X, box.Max.Y, box.Min.Z) - c, V3d(box.Max.X, box.Max.Y, box.Max.Z) - c);
-                Line3d(V3d(box.Min.X, box.Max.Y, box.Min.Z) - c, V3d(box.Min.X, box.Max.Y, box.Max.Z) - c)
-            |]
-        let wireBoxes (boxes : Box3d[]) = boxes |> Array.collect box2lines
-        let boundsToShowCorrected = Mod.constant (wireBoxes boundsToShow)
-        let boundsToShowSg =
-            boundsToShowCorrected
-            |> Sg.lines (Mod.constant C4b.Gray)
-            |> Sg.shader {
-                do! DefaultSurfaces.trafo
-                do! DefaultSurfaces.thickLine
-                do! DefaultSurfaces.vertexColor
-            }
-            |> Sg.uniform "LineWidth" (Mod.constant 1.0)
-
-        // scene graph
-        let sg = 
-            [pcsg; bboxSg; boundsToShowSg] // coordinateCross
-                |> Sg.ofList
-                    
-        sg
-
-module Main = 
-    open Newtonsoft.Json.Linq
+module CmdLine = 
 
     let usage () =
-        Log.line "usage: hum <command> <args...>"
+        Log.line "usage: humcli <command> <args...>"
         Log.line "    show <store> <id>               shows pointcloud with given <id> in given <store>"
         Log.line "    info <filename>                 prints info (e.g. point count, bounding box, ...)"
         Log.line "    import <filename> <store> <id>  imports <filename> into <store> with <id>"
         Log.line "        [-mindist <dist>]                skips points on import, which are less than"
         Log.line "                                         given distance from previous point, e.g. -mindist 0.001"
 
+    let init () =
+        Import.Pts.PtsFormat |> ignore
+        Import.E57.E57Format |> ignore
+        Import.Yxh.YxhFormat |> ignore
+
+
     let parseBounds filename =
         let json = JArray.Parse(File.readAllText filename) :> seq<JToken>
         json
             |> Seq.map (fun j -> Box3d.Parse(j.["Bounds"].ToObject<string>()))
             |> Array.ofSeq
-
 
     let show (store : string) (id : string) (argv : string[]) =
 
@@ -169,6 +67,7 @@ module Main =
             | Some filename -> parseBounds filename
             | None -> [| |]
             
+        //init ()
         let store = PointCloud.OpenStore(store)
         let ps = store.GetPointSet(id, CancellationToken.None)
         let data = Lod.OctreeLodData(ps)
@@ -317,6 +216,7 @@ module Main =
         win.Run()
 
     let info (filename : string) (argv : string[]) =
+        init ()
         let info = PointCloud.ParseFileInfo(filename, ImportConfig.Default)
         Console.WriteLine("filename      {0}", info.FileName)
         Console.WriteLine("format        {0}", info.Format.Description)
@@ -347,39 +247,22 @@ module Main =
                 .WithVerbose(true)
                 .WithMinDist(minDist)
         
+        init ()
         let ps = PointCloud.Import(filename, cfg)
 
         Console.WriteLine("point count   {0:N0}", ps.PointCount)
         Console.WriteLine("bounds        {0}", ps.BoundingBox)
 
     let processArgs (argv : string[]) =
-        try
-            match argv.[0] with
-            | "show"   -> show argv.[1] argv.[2] (Array.skip 3 argv)
-            | "info"   -> info argv.[1] (Array.skip 2 argv)
-            | "import" -> import argv.[1] argv.[2] argv.[3] (Array.skip 4 argv)
-            | _        -> usage ()
-        with e ->
-            Log.line "%A" e
+        if argv.Length > 0 then
+            try
+                match argv.[0] with
+                | "show"   -> show argv.[1] argv.[2] (Array.skip 3 argv)
+                | "info"   -> info argv.[1] (Array.skip 2 argv)
+                | "import" -> import argv.[1] argv.[2] argv.[3] (Array.skip 4 argv)
+                | _        -> usage ()
+            with e ->
+                Log.line "%A" e
+                usage ()
+        else
             usage ()
-
-    [<EntryPoint;STAThread>]
-    let main argv = 
-    
-        Console.ForegroundColor <- ConsoleColor.White
-        Console.Write("A viewer for ")
-        Console.ForegroundColor <- ConsoleColor.Green
-        Console.Write("hum")
-        Console.ForegroundColor <- ConsoleColor.White
-        Console.WriteLine("ongous point clouds.")
-        Console.WriteLine("Copyright (c) 2018. Attila Szabo, Georg Haaser, Harald Steinlechner, Stefan Maierhofer.")
-        Console.WriteLine("GNU AFFERO GENERAL PUBLIC LICENSE.")
-        Console.ResetColor()
-        
-        Import.Pts.PtsFormat |> ignore
-        Import.E57.E57Format |> ignore
-        Import.Yxh.YxhFormat |> ignore
-
-        processArgs argv
-
-        0
