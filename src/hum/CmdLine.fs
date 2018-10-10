@@ -31,7 +31,7 @@ module CmdLine =
 
     let usage () =
         Log.line "usage: humcli <command> <args...>"
-        Log.line "    show <store> <id>               shows pointcloud with given <id> in given <store>"
+        Log.line "    view <store> <id>               shows pointcloud with given <id> in given <store>"
         Log.line "    info <filename>                 prints info (e.g. point count, bounding box, ...)"
         Log.line "    import <filename> <store> <id>  imports <filename> into <store> with <id>"
         Log.line "        [-mindist <dist>]                skips points on import, which are less than"
@@ -49,7 +49,7 @@ module CmdLine =
             |> Seq.map (fun j -> Box3d.Parse(j.["Bounds"].ToObject<string>()))
             |> Array.ofSeq
 
-    let show (store : string) (id : string) (argv : string[]) =
+    let view (store : string) (id : string) (argv : string[]) =
 
         let mutable showBoundsFileName = None
         let mutable i = 0
@@ -257,7 +257,7 @@ module CmdLine =
         if argv.Length > 0 then
             try
                 match argv.[0] with
-                | "show"   -> show argv.[1] argv.[2] (Array.skip 3 argv)
+                | "view"   -> view argv.[1] argv.[2] (Array.skip 3 argv)
                 | "info"   -> info argv.[1] (Array.skip 2 argv)
                 | "import" -> import argv.[1] argv.[2] argv.[3] (Array.skip 4 argv)
                 | _        -> usage ()

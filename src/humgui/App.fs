@@ -20,7 +20,7 @@ open hum
 type Message =
     | ToggleModel
     | CameraMessage of FreeFlyController.Message
-    | LoadBeigl
+    //| LoadBeigl
     | OpenStore of list<string>
     | LoadId    of string
     | Nop
@@ -62,12 +62,12 @@ module App =
             | CameraMessage msg ->
                 { m with cameraState = FreeFlyController.update m.cameraState msg }
 
-            | LoadBeigl ->
-                let store = @"c:\Data\test"
-                let id = "test"
-                let store = PointCloud.OpenStore(store)
-                let ps = store.GetPointSet(id, CancellationToken.None)
-                { m with pointSet = Some ps }
+            //| LoadBeigl ->
+            //    let store = @"c:\Data\test"
+            //    let id = "test"
+            //    let store = PointCloud.OpenStore(store)
+            //    let ps = store.GetPointSet(id, CancellationToken.None)
+            //    { m with pointSet = Some ps }
             | OpenStore paths -> 
                 match paths with
                     | path::[] -> 
@@ -145,16 +145,16 @@ module App =
 
         let main =
              adornerMenu [
-                "IO", [
-                    button [clazz "ui small dark button"; onClick (fun _ -> LoadBeigl)] [text "load beigl"]
-                    br []
+                "View", [
+                    //button [clazz "ui small dark button"; onClick (fun _ -> LoadBeigl)] [text "load beigl"]
+                    //br []
                     button [
                         onChooseFiles OpenStore
                         clientEvent "onclick" ("aardvark.processEvent('__ID__', 'onchoose', aardvark.dialog.showOpenDialog({properties: ['openFile', 'openDirectory']}));") 
                     ] [text "open directory"]
                     br []
                     label [] [text "Poind cloud key:"]
-                    br []
+                    //br []
                     input [onChange LoadId] 
                 ]
              ] [mainView]
