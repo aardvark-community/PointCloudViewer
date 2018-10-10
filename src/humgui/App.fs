@@ -20,9 +20,10 @@ open hum
 type Message =
     | ToggleModel
     | CameraMessage of FreeFlyController.Message
-    //| LoadBeigl
-    | OpenStore of list<string>
-    | LoadId    of string
+    | OpenStore     of list<string>
+    | LoadId        of string
+    | ImportFiles    of list<string>
+    | ShowFileInfos  of list<string>
     | Nop
 
 module Store =
@@ -61,13 +62,7 @@ module App =
 
             | CameraMessage msg ->
                 { m with cameraState = FreeFlyController.update m.cameraState msg }
-
-            //| LoadBeigl ->
-            //    let store = @"c:\Data\test"
-            //    let id = "test"
-            //    let store = PointCloud.OpenStore(store)
-            //    let ps = store.GetPointSet(id, CancellationToken.None)
-            //    { m with pointSet = Some ps }
+                
             | OpenStore paths -> 
                 match paths with
                     | path::[] -> 
@@ -86,6 +81,14 @@ module App =
                 match Store.tryOpenPointSet m id with
                     | Result.Ok v -> Log.line "loaded id: %s" id; { m with pointSet = Some v }
                     | Result.Error str -> Log.error "%s" str; m
+
+            | ImportFiles filenames ->
+                Log.line "[ImportFiles] not implemented"
+                m
+
+            | ShowFileInfos filenames ->
+                Log.line "[ShowFileInfos] not implemented"
+                m
                      
             | Nop -> m
                 
@@ -151,11 +154,22 @@ module App =
                     button [
                         onChooseFiles OpenStore
                         clientEvent "onclick" ("aardvark.processEvent('__ID__', 'onchoose', aardvark.dialog.showOpenDialog({properties: ['openFile', 'openDirectory']}));") 
-                    ] [text "open directory"]
-                    br []
-                    label [] [text "Poind cloud key:"]
+                    ] [text "Open store"]
+                    label [] [text "Pointcloud key:"]
                     //br []
                     input [onChange LoadId] 
+                ];
+                "Import", [
+                    button [
+                        onChooseFiles ImportFiles
+                        clientEvent "onclick" ("aardvark.processEvent('__ID__', 'onchoose', aardvark.dialog.showOpenDialog({properties: ['openFile', 'multiSelections']}));") 
+                    ] [text "Import file"]
+                ];
+                "Info", [
+                    button [
+                        onChooseFiles ShowFileInfos
+                        clientEvent "onclick" ("aardvark.processEvent('__ID__', 'onchoose', aardvark.dialog.showOpenDialog({properties: ['openFile', 'multiSelections']}));") 
+                    ] [text "Show file info"]
                 ]
              ] [mainView]
 
