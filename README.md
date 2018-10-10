@@ -13,14 +13,14 @@ Build the project:
 build
 ```
 
-Create the executables `humcli` and `humgui`:
+Deploy executables `humcli.exe` and `humgui.exe` to `./pub` directory:
 ```sh
 publish
 ```
 
 ## Command Line Interface
 
-Use `humcli` (or simply `hum`) for the command line interface.
+Use `humcli` (or simply `hum`) to use the command line interface.
 
 ```sh
 usage: humcli <command> <args...>
@@ -31,9 +31,9 @@ usage: humcli <command> <args...>
                                          given distance from previous point, e.g. -mindist 0.001
 ```
 
-## Graphical User Interface
+## GUI
 
-Use `humgui` to start the GUI version.
+Use `humgui` to start the graphical user interface.
 
 ## Licensing
 
