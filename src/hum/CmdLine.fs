@@ -78,7 +78,7 @@ module CmdLine =
         
         use app = new OpenGlApplication()
         let win = app.CreateGameWindow(8)
-        win.Title <- "Humongous Point Clouds Viewer"
+        win.Title <- "hum - a viewer for humongous point clouds"
         let speed = 10.0 |> Mod.init
         let initialView = CameraView.lookAt V3d.OIO V3d.Zero V3d.OOI
         let view = initialView |> DefaultCameraController.controlWithSpeed speed win.Mouse win.Keyboard win.Time
