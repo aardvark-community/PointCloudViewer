@@ -15,6 +15,7 @@ namespace hum
 
 open System
 open System.Threading
+open System.Collections.Generic
 open Aardvark.Base
 open Aardvark.Base.Incremental
 open Aardvark.Base.Rendering
@@ -34,8 +35,15 @@ module CmdLine =
         Log.line "    view <store> <id>               shows pointcloud with given <id> in given <store>"
         Log.line "    info <filename>                 prints info (e.g. point count, bounding box, ...)"
         Log.line "    import <filename> <store> <id>  imports <filename> into <store> with <id>"
-        Log.line "        [-mindist <dist>]                skips points on import, which are less than"
+        Log.line "        [-mindist <dist>]              skips points on import, which are less than"
         Log.line "                                         given distance from previous point, e.g. -mindist 0.001"
+        Log.line "        [-ascii <format>]              e.g. \"x y z _ r g b\""
+        Log.line "                                         position      : x,y,z"
+        Log.line "                                         normal        : u,v,w"
+        Log.line "                                         color         : r,g,b,a"
+        Log.line "                                         color (float) : R,G,B,A"
+        Log.line "                                         intensity     : i"
+        Log.line "                                         skip          : _"
 
     let init () =
         Import.Pts.PtsFormat |> ignore
@@ -48,6 +56,29 @@ module CmdLine =
         json
             |> Seq.map (fun j -> Box3d.Parse(j.["Bounds"].ToObject<string>()))
             |> Array.ofSeq
+
+    let getLineDefinitions (s : string) =
+        let result = new List<Ascii.Token>()
+        for c in s.SplitOnWhitespace() do
+            match c with
+            | "x" -> result.Add(Ascii.Token.PositionX)
+            | "y" -> result.Add(Ascii.Token.PositionY)
+            | "z" -> result.Add(Ascii.Token.PositionZ)
+            | "nx" -> result.Add(Ascii.Token.NormalX)
+            | "ny" -> result.Add(Ascii.Token.NormalY)
+            | "nz" -> result.Add(Ascii.Token.NormalZ)
+            | "i" -> result.Add(Ascii.Token.Intensity)
+            | "r" -> result.Add(Ascii.Token.ColorR)
+            | "g" -> result.Add(Ascii.Token.ColorG)
+            | "b" -> result.Add(Ascii.Token.ColorB)
+            | "a" -> result.Add(Ascii.Token.ColorA)
+            | "R" -> result.Add(Ascii.Token.ColorRf)
+            | "G" -> result.Add(Ascii.Token.ColorGf)
+            | "B" -> result.Add(Ascii.Token.ColorBf)
+            | "A" -> result.Add(Ascii.Token.ColorAf)
+            | "_" -> result.Add(Ascii.Token.Skip)
+            | _ -> failwith "unknown token"
+        result.ToArray()
 
     let view (store : string) (id : string) (argv : string[]) =
 
@@ -227,12 +258,15 @@ module CmdLine =
     let import (filename : string) (store : string) (id : string) (argv : string[]) =
 
         let mutable minDist = 0.0
+        let mutable asciiFormat = None
 
         let mutable i = 0
         while i < argv.Length do
             match argv.[i] with
             | "-md"
             | "-mindist" -> minDist <- Double.Parse(argv.[i + 1])
+                            i <- i + 1
+            | "-ascii"   -> asciiFormat <- Some argv.[i + 1]
                             i <- i + 1
             | _ -> failwith (sprintf "unknown argument %s" argv.[i])
 
@@ -248,7 +282,11 @@ module CmdLine =
                 .WithMinDist(minDist)
         
         init ()
-        let ps = PointCloud.Import(filename, cfg)
+        
+        let ps = match asciiFormat with
+                 | None -> PointCloud.Import(filename, cfg)
+                 | Some f -> let chunks = Import.Ascii.Chunks(filename, getLineDefinitions f, cfg)
+                             PointCloud.Chunks(chunks, cfg)
 
         Console.WriteLine("point count   {0:N0}", ps.PointCount)
         Console.WriteLine("bounds        {0}", ps.BoundingBox)
