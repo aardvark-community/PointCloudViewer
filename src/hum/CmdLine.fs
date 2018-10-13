@@ -41,8 +41,8 @@ module CmdLine =
         Import.Pts.PtsFormat |> ignore
         Import.E57.E57Format |> ignore
         Import.Yxh.YxhFormat |> ignore
-
-
+        Import.Ply.PlyFormat |> ignore
+        
     let parseBounds filename =
         let json = JArray.Parse(File.readAllText filename) :> seq<JToken>
         json

@@ -16,3 +16,6 @@ bin/Debug
 /test.store
 /src/PointCloudViewer3/Properties/launchSettings.json
 /pub
+/teststore
+/src/hum/Properties/launchSettings.json
+/src/humcli/Properties/launchSettings.json
