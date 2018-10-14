@@ -41,7 +41,7 @@ module CmdLine =
         Log.line "                                         position      : x,y,z"
         Log.line "                                         normal        : nx,ny,nz"
         Log.line "                                         color         : r,g,b,a"
-        Log.line "                                         color (float) : R,G,B,A"
+        Log.line "                                         color (float) : rf, gf, bf, af"
         Log.line "                                         intensity     : i"
         Log.line "                                         skip          : _"
 
