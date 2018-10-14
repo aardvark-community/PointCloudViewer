@@ -24,11 +24,18 @@ Use `humcli` (or simply `hum`) to use the command line interface.
 
 ```sh
 usage: humcli <command> <args...>
-    show <store> <id>               shows pointcloud with given <id> in given <store>
+    view <store> <id>               shows pointcloud with given <id> in given <store>
     info <filename>                 prints info (e.g. point count, bounding box, ...)
     import <filename> <store> <id>  imports <filename> into <store> with <id>
-        [-mindist <dist>]                skips points on import, which are less than
+        [-mindist <dist>]              skips points on import, which are less than
                                          given distance from previous point, e.g. -mindist 0.001
+        [-ascii <format>]              e.g. "x y z _ r g b"
+                                         position      : x,y,z
+                                         normal        : u,v,w
+                                         color         : r,g,b,a
+                                         color (float) : R,G,B,A
+                                         intensity     : i
+                                         skip          : _
 ```
 
 ## GUI
