@@ -37,7 +37,7 @@ module CmdLine =
         Log.line "    import <filename> <store> <id>  imports <filename> into <store> with <id>"
         Log.line "        [-mindist <dist>]              skips points on import, which are less than"
         Log.line "                                         given distance from previous point, e.g. -mindist 0.001"
-        Log.line "        [-ascii <format>]              e.g. \"x y z _ r g b\""
+        Log.line "        [-ascii <format>]              e.g. -ascii \"x y z _ r g b\""
         Log.line "                                         position      : x,y,z"
         Log.line "                                         normal        : nx,ny,nz"
         Log.line "                                         color         : r,g,b,a"

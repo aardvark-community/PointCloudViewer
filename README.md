@@ -29,7 +29,7 @@ usage: humcli <command> <args...>
     import <filename> <store> <id>  imports <filename> into <store> with <id>
         [-mindist <dist>]              skips points on import, which are less than
                                          given distance from previous point, e.g. -mindist 0.001
-        [-ascii <format>]              e.g. "x y z _ r g b"
+        [-ascii <format>]              e.g. -ascii "x y z _ r g b"
                                          position      : x,y,z
                                          normal        : nx,ny,nz
                                          color         : r,g,b,a
