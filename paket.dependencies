@@ -1,11 +1,11 @@
-framework: netstandard2.0, net471, netcoreapp2.0
+framework: netstandard2.0, netcoreapp2.0
 source https://api.nuget.org/v3/index.json
 
 nuget FSharp.Core                           ~> 4.3.0
                                             
-nuget Aardvark.Base                         ~> 4.2.3
-nuget Aardvark.Base.Incremental             ~> 4.2.3
-nuget Aardvark.Base.FSharp                  ~> 4.2.3
+nuget Aardvark.Base                         ~> 4.2.4
+nuget Aardvark.Base.Incremental             ~> 4.2.4
+nuget Aardvark.Base.FSharp                  ~> 4.2.4
                                             
 nuget Aardvark.Base.Rendering               ~> 4.4.2
 nuget Aardvark.SceneGraph                   ~> 4.4.2
@@ -28,10 +28,10 @@ nuget Aardvark.Compiler.DomainTypes.MSBuild ~> 4.2.1
 nuget Aardium                               ~> 1.0.18
 
 nuget Ply.Net                               ~> 0.0.1
-//nuget LASzip                                ~> 0.2.0-prerelease1
+nuget LASzip                                ~> 0.2.0-prerelease2
 
 group Build
-framework: net471
+framework: netcoreapp2.0
 content: none
 source https://api.nuget.org/v3/index.json
 
