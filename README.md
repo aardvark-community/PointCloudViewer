@@ -1,4 +1,4 @@
-# hum - *a viewer for **hum**ongous point clouds*
+# hum - a viewer for *hum*ongous point clouds
 
 ## Build Instructions (Windows)
 
