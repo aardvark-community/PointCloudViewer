@@ -31,9 +31,9 @@ usage: humcli <command> <args...>
                                          given distance from previous point, e.g. -mindist 0.001
         [-ascii <format>]              e.g. "x y z _ r g b"
                                          position      : x,y,z
-                                         normal        : u,v,w
+                                         normal        : nx,ny,nz
                                          color         : r,g,b,a
-                                         color (float) : R,G,B,A
+                                         color (float) : rf,gf,bf,af
                                          intensity     : i
                                          skip          : _
 ```

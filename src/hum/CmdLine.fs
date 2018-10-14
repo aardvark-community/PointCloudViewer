@@ -39,7 +39,7 @@ module CmdLine =
         Log.line "                                         given distance from previous point, e.g. -mindist 0.001"
         Log.line "        [-ascii <format>]              e.g. \"x y z _ r g b\""
         Log.line "                                         position      : x,y,z"
-        Log.line "                                         normal        : u,v,w"
+        Log.line "                                         normal        : nx,ny,nz"
         Log.line "                                         color         : r,g,b,a"
         Log.line "                                         color (float) : R,G,B,A"
         Log.line "                                         intensity     : i"
@@ -73,10 +73,10 @@ module CmdLine =
             | "g" -> result.Add(Ascii.Token.ColorG)
             | "b" -> result.Add(Ascii.Token.ColorB)
             | "a" -> result.Add(Ascii.Token.ColorA)
-            | "R" -> result.Add(Ascii.Token.ColorRf)
-            | "G" -> result.Add(Ascii.Token.ColorGf)
-            | "B" -> result.Add(Ascii.Token.ColorBf)
-            | "A" -> result.Add(Ascii.Token.ColorAf)
+            | "rf" -> result.Add(Ascii.Token.ColorRf)
+            | "gf" -> result.Add(Ascii.Token.ColorGf)
+            | "bf" -> result.Add(Ascii.Token.ColorBf)
+            | "af" -> result.Add(Ascii.Token.ColorAf)
             | "_" -> result.Add(Ascii.Token.Skip)
             | _ -> failwith "unknown token"
         result.ToArray()
