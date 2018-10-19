@@ -1,4 +1,4 @@
-namespace gumgui.Model
+namespace humgui.Model
 
 open System
 open Aardvark.Base
@@ -15,9 +15,10 @@ type Primitive =
 [<DomainType>]
 type Model =
     {
-        currentModel    : Primitive
         cameraState     : CameraControllerState
 
         store           : Option<Storage>
         pointSet        : Option<PointSet>
+
+        createLod       : bool
     }

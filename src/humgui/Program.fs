@@ -1,4 +1,4 @@
-open gumgui
+open humgui
 
 open Aardium
 open Aardvark.Application.Slim
@@ -13,6 +13,7 @@ open System
 [<EntryPoint>]
 let main args =
 
+    // args
     let mutable port = 4321
     let mutable useVulkan = true
     let mutable i = 0
@@ -24,19 +25,17 @@ let main args =
 
         i <- i + 1
 
+    // init & run
     Ag.initialize()
     Aardvark.Init()
     Aardium.init()
     
     if useVulkan then
-
         let app = new HeadlessVulkanApplication(true)
         WebPart.startServer port [
             MutableApp.toWebPart' app.Runtime false (App.start App.app)
         ]
-
     else
-
         let app = new OpenGlApplication(true)
         WebPart.startServer port [
             MutableApp.toWebPart' app.Runtime false (App.start App.app)

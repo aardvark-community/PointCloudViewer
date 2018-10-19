@@ -1,13 +1,14 @@
-namespace gumgui
+namespace humgui
 
 open System
+open System.IO
 open System.Threading
 open Aardvark.Base
 open Aardvark.Base.Incremental
 open Aardvark.UI
 open Aardvark.UI.Primitives
 open Aardvark.Base.Rendering
-open gumgui.Model
+open humgui.Model
 
 // remove
 open Aardvark.Geometry.Points
@@ -18,20 +19,23 @@ open Uncodium.SimpleStore
 open hum
 
 type Message =
-    | ToggleModel
-    | CameraMessage of FreeFlyController.Message
-    | OpenStore     of list<string>
-    | LoadId        of string
-    | ImportFiles    of list<string>
-    | ShowFileInfos  of list<string>
+    | CameraMessage     of FreeFlyController.Message
+    | OpenStore         of list<string>
+    | LoadKeyFromStore  of string
+    | ImportFiles       of list<string>
+    | ShowFileInfos     of list<string>
+    | ToggleLod
     | Nop
 
 module Store =
-    let tryOpenStore (dir : string) =
-        try 
-            Result.Ok (PointCloud.OpenStore dir)
+    let tryOpenStore (dirname : string) =
+        try
+            if (Directory.Exists(dirname)) then
+                Result.Ok (PointCloud.OpenStore dirname)
+            else
+                Result.Error (sprintf "store '%s' does not exist." dirname)
         with e -> 
-            Result.Error e
+            Result.Error e.Message
 
     let tryOpenPointSet (m : Model) (key : string) =
         Log.line "tryOpenPointSet %s" key
@@ -47,20 +51,15 @@ module Store =
 
 module App =
 
-    let initial = { 
-        currentModel = Box; 
+    let initial = {  
         cameraState = FreeFlyController.initial
         pointSet = None
         store = None
+        createLod = true
     }
 
     let update (m : Model) (msg : Message) =
         match msg with
-            | ToggleModel -> 
-                match m.currentModel with
-                    | Box -> { m with currentModel = Sphere }
-                    | Sphere -> { m with currentModel = Box }
-
             | CameraMessage msg ->
                 { m with cameraState = FreeFlyController.update m.cameraState msg }
                 
@@ -74,11 +73,11 @@ module App =
                                 { m with store = Some newStore; pointSet = None }
                             | Result.Error err -> 
                                 // to ui log
-                                Log.error "%s" err.Message
+                                Log.error "%s" err
                                 m
                     | _ -> m
                      
-            | LoadId id -> 
+            | LoadKeyFromStore id -> 
                 match Store.tryOpenPointSet m id with
                     | Result.Ok v -> Log.line "loaded id: %s, splitLimit: %d" id v.SplitLimit; { m with pointSet = Some v }
                     | Result.Error str -> Log.error "%s" str; m
@@ -90,11 +89,17 @@ module App =
             | ShowFileInfos filenames ->
                 Log.line "[ShowFileInfos] not implemented"
                 m
+
+            | ToggleLod ->
+                Log.line "toggling lod"
+                { m with createLod = not m.createLod }
                      
             | Nop -> m
                 
 
     let dependencies = [] @ Html.semui
+
+    // https://semantic-ui.com
 
     let adornerMenu (sectionsAndItems : list<string * list<DomNode<'msg>>>) (rest : list<DomNode<'msg>>) =
         let pushButton() = 
@@ -114,8 +119,26 @@ module App =
                 ]
             yield 
                 Html.SemUi.menu "ui vertical inverted sidebar menu" sectionsAndItems
-        ]    
+        ]
+        
+    let toggleBox (msg : string) (state : IMod<bool>) (toggle : unit -> 'msg) =
 
+        let attributes = 
+            amap {
+                yield attribute "type" "checkbox"
+                yield onChange (fun _ -> toggle ())
+                let! check = state
+                if check then
+                    yield attribute "checked" "checked"
+            }
+
+        onBoot "$('#__ID__').checkbox()" (
+            div [clazz "ui checkbox"] [
+                Incremental.input (AttributeMap.ofAMap attributes)
+                label [style "color:white"] [text msg] 
+            ]
+        )
+        
     let onChooseFiles (chosen : list<string> -> 'msg) =
         let cb xs =
             match xs with
@@ -128,8 +151,7 @@ module App =
 
         let frustum = 
             Frustum.perspective 60.0 1.0 50000.0 1.0 |> Mod.constant
-
-        
+            
         let sg = 
             adaptive {
                 let! ps = m.pointSet
@@ -150,21 +172,26 @@ module App =
         let main =
              adornerMenu [
                 "View", [
-                    //button [clazz "ui small dark button"; onClick (fun _ -> LoadBeigl)] [text "load beigl"]
-                    //br []
+                    
                     button [
                         onChooseFiles OpenStore
                         clientEvent "onclick" ("aardvark.processEvent('__ID__', 'onchoose', aardvark.dialog.showOpenDialog({properties: ['openFile', 'openDirectory']}));") 
                     ] [text "Open store"]
+
                     label [] [text "Pointcloud key:"]
-                    //br []
-                    input [onChange LoadId] 
+                    input [onChange LoadKeyFromStore]
+
+                    //div [clazz "ui labeled input"] [
+                    //    div [clazz "ui label"] [text "Pointcloud key:"]
+                    //    input ["type" "text"] []
+                    //]
                 ];
                 "Import", [
                     button [
                         onChooseFiles ImportFiles
                         clientEvent "onclick" ("aardvark.processEvent('__ID__', 'onchoose', aardvark.dialog.showOpenDialog({properties: ['openFile', 'multiSelections']}));") 
                     ] [text "Import file"]
+                    toggleBox "create levels-of-detail" m.createLod (fun () -> ToggleLod)
                 ];
                 "Info", [
                     button [
