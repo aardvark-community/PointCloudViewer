@@ -19,6 +19,7 @@ open System.Collections.Generic
 open Aardvark.Base
 open Aardvark.Base.Incremental
 open Aardvark.Base.Rendering
+open Aardvark.Rendering.Vulkan
 open Aardvark.SceneGraph
 open Aardvark.Application
 open Aardvark.Application.Slim
@@ -33,6 +34,7 @@ module CmdLine =
     let usage () =
         Log.line "usage: humcli <command> <args...>"
         Log.line "    view <store> <id>               shows pointcloud with given <id> in given <store>"
+        Log.line "        [-gl]                            uses OpenGL instead of Vulkan"
         Log.line "    info <filename>                 prints info (e.g. point count, bounding box, ...)"
         Log.line "    import <filename> <store> <id>  imports <filename> into <store> with <id>"
         Log.line "        [-mindist <dist>]              skips points on import, which are less than"
@@ -83,10 +85,12 @@ module CmdLine =
 
     let view (store : string) (id : string) (argv : string[]) =
 
+        let mutable useVulkan = true
         let mutable showBoundsFileName = None
         let mutable i = 0
         while i < argv.Length do
             match argv.[i] with
+            | "-gl" | "-ogl" -> useVulkan <- false
             | "-sb" -> showBoundsFileName <- Some argv.[i + 1]
                        i <- i + 1
             | _ -> failwith (sprintf "unknown argument %s" argv.[i])
