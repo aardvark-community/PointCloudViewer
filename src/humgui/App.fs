@@ -34,6 +34,7 @@ module Store =
             Result.Error e
 
     let tryOpenPointSet (m : Model) (key : string) =
+        Log.line "tryOpenPointSet %s" key
         match m.store with
             | None -> Result.Error "no store"
             | Some store -> 
@@ -79,7 +80,7 @@ module App =
                      
             | LoadId id -> 
                 match Store.tryOpenPointSet m id with
-                    | Result.Ok v -> Log.line "loaded id: %s" id; { m with pointSet = Some v }
+                    | Result.Ok v -> Log.line "loaded id: %s, splitLimit: %d" id v.SplitLimit; { m with pointSet = Some v }
                     | Result.Error str -> Log.error "%s" str; m
 
             | ImportFiles filenames ->
