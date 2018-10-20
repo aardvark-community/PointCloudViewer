@@ -16,6 +16,10 @@
   </PropertyGroup>
   <ItemGroup>
 
+    <Compile Include="Args.fs" />
+
+    <Compile Include="Model.fs" />
+
     <Compile Include="Shader.fs" />
 
     <Compile Include="Rendering.fs" />

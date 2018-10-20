@@ -13,6 +13,8 @@ open System
 [<EntryPoint>]
 let main args =
 
+    let foo = hum.Args.parse [| "-gl"; "-ascii"; "x y z" |]
+
     // args
     let mutable port = 4321
     let mutable useVulkan = true

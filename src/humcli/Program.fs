@@ -27,7 +27,7 @@ module Main =
         Console.Write("hum")
         Console.ForegroundColor <- ConsoleColor.White
         Console.WriteLine("ongous point clouds.")
-        Console.WriteLine("Copyright (c) 2018. Attila Szabo, Georg Haaser, Harald Steinlechner, Stefan Maierhofer.")
+        Console.WriteLine("Copyright (c) 2018. purefunctional.io")
         Console.WriteLine("https://github.com/aardvark-community/hum")
         Console.WriteLine("---------------------------------------------------------------------------------------")
         Console.ResetColor()

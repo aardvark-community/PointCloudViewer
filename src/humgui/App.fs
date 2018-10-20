@@ -1,22 +1,17 @@
 namespace humgui
 
+open Aardvark.Application
+open Aardvark.Base
+open Aardvark.Base.Incremental
+open Aardvark.Base.Rendering
+open Aardvark.Geometry.Points
+open Aardvark.UI
+open Aardvark.UI.Primitives
+open hum
+open hum.Model
 open System
 open System.IO
 open System.Threading
-open Aardvark.Base
-open Aardvark.Base.Incremental
-open Aardvark.UI
-open Aardvark.UI.Primitives
-open Aardvark.Base.Rendering
-open humgui.Model
-
-// remove
-open Aardvark.Geometry.Points
-open Aardvark.Data.Points
-open Aardvark.Data.Points.Import
-open Uncodium.SimpleStore
-
-open hum
 
 type Message =
     | CameraMessage     of FreeFlyController.Message
@@ -25,6 +20,8 @@ type Message =
     | ImportFiles       of list<string>
     | ShowFileInfos     of list<string>
     | ToggleLod
+    | KeyDown           of key : Keys
+    | KeyUp             of key : Keys
     | Nop
 
 module Store =
@@ -56,8 +53,10 @@ module App =
         pointSet = None
         store = None
         createLod = true
+        pointSize = 1.0
+        targetPixelDistance = 1.0
     }
-
+    
     let update (m : Model) (msg : Message) =
         match msg with
             | CameraMessage msg ->
@@ -93,6 +92,19 @@ module App =
             | ToggleLod ->
                 Log.line "toggling lod"
                 { m with createLod = not m.createLod }
+
+            | KeyDown k ->
+                Log.line "[KeyDown] %A" k
+                match k with
+                | Keys.P ->  { m with pointSize = m.pointSize * 1.25 }
+                | Keys.O ->  { m with pointSize = m.pointSize / 1.25 }
+                | Keys.T ->  { m with targetPixelDistance = m.targetPixelDistance * 1.25 }
+                | Keys.R ->  { m with targetPixelDistance = m.targetPixelDistance / 1.25 }
+                | _ -> m
+                
+            | KeyUp k ->
+                Log.line "[KeyUp] %A" k
+                m
                      
             | Nop -> m
                 
@@ -148,7 +160,7 @@ module App =
         onEvent "onchoose" [] cb
 
     let view (m : MModel) =
-
+    
         let frustum = 
             Frustum.perspective 60.0 1.0 50000.0 1.0 |> Mod.constant
             
@@ -158,12 +170,13 @@ module App =
                 match ps with
                     | None -> return Sg.empty 
                     | Some ps -> 
-                        return Scene.createSceneGraph ps [||] |> Sg.noEvents
+                        return Scene.createSceneGraph m ps [||] |> Sg.noEvents
             } |> Sg.dynamic
 
         let att =
             [
                 style "position: fixed; left: 0; top: 0; width: 100%; height: 100%"
+                onKeyDown KeyDown; onKeyUp KeyUp
             ]
 
         let mainView = 

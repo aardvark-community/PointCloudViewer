@@ -15,8 +15,6 @@
     <AssemblyName>humgui</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-	<Compile Include="Model.fs" />
-	<Compile Include="Model.g.fs" />
 	<Compile Include="App.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

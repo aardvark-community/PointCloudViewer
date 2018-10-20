@@ -1,8 +1,7 @@
 {
   "profiles": {
     "PointCloudViewer3": {
-      "commandName": "Project",
-      "commandLineArgs": "show c:\\Data\\test test"
+      "commandName": "Project"
     }
   }
 }

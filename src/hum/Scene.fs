@@ -18,17 +18,16 @@ open Aardvark.Base.Incremental
 open Aardvark.Base.Rendering
 open Aardvark.Geometry.Points
 open Aardvark.SceneGraph
+open hum.Model
         
 module Scene =
 
-    let createSceneGraph (ps : PointSet) (boundsToShow : Box3d[]) : ISg =
+    let createSceneGraph (m : MModel) (ps : PointSet) (boundsToShow : Box3d[]) : ISg =
 
         let data = Lod.OctreeLodData(ps)
         let center = ps.BoundingBox.Center
-
-        let pss = Mod.init 3.0
-        let tpd = Mod.init 1.5
-        let rasterizer = tpd |> Mod.map LodData.defaultRasterizeSet
+        
+        let rasterizer = m.targetPixelDistance |> Mod.map LodData.defaultRasterizeSet
         
         let info = {
             lodRasterizer           = rasterizer
@@ -61,7 +60,7 @@ module Scene =
         let pcsg = 
             Sg.pointCloud data info
                 |> Sg.effect Surfaces.pointsprite
-                |> Sg.uniform "PointSize" pss
+                |> Sg.uniform "PointSize" m.pointSize
                 //|> Sg.uniform "ViewportSize" win.Sizes TODO
 
         let coordinateCross = 
