@@ -29,77 +29,19 @@ open Aardvark.Data.Points.Import
 open Newtonsoft.Json.Linq
 open Uncodium.SimpleStore
 
+[<AutoOpen>]
 module CmdLine = 
 
-    let usage () =
-        Log.line "usage: humcli <command> <args...>"
-        Log.line "    view <store> <id>               shows pointcloud with given <id> in given <store>"
-        Log.line "        [-gl]                            uses OpenGL instead of Vulkan"
-        Log.line "    info <filename>                 prints info (e.g. point count, bounding box, ...)"
-        Log.line "    import <filename> <store> <id>  imports <filename> into <store> with <id>"
-        Log.line "        [-mindist <dist>]              skips points on import, which are less than"
-        Log.line "                                         given distance from previous point, e.g. -mindist 0.001"
-        Log.line "        [-ascii <format>]              e.g. -ascii \"x y z _ r g b\""
-        Log.line "                                         position      : x,y,z"
-        Log.line "                                         normal        : nx,ny,nz"
-        Log.line "                                         color         : r,g,b,a"
-        Log.line "                                         color (float) : rf, gf, bf, af"
-        Log.line "                                         intensity     : i"
-        Log.line "                                         skip          : _"
-
-    let init () =
-        Import.Pts.PtsFormat |> ignore
-        Import.E57.E57Format |> ignore
-        Import.Yxh.YxhFormat |> ignore
-        Import.Ply.PlyFormat |> ignore
-        Import.Laszip.LaszipFormat |> ignore
-        
     let parseBounds filename =
         let json = JArray.Parse(File.readAllText filename) :> seq<JToken>
         json
             |> Seq.map (fun j -> Box3d.Parse(j.["Bounds"].ToObject<string>()))
             |> Array.ofSeq
-
-    let getLineDefinitions (s : string) =
-        let result = new List<Ascii.Token>()
-        for c in s.SplitOnWhitespace() do
-            match c with
-            | "x" -> result.Add(Ascii.Token.PositionX)
-            | "y" -> result.Add(Ascii.Token.PositionY)
-            | "z" -> result.Add(Ascii.Token.PositionZ)
-            | "nx" -> result.Add(Ascii.Token.NormalX)
-            | "ny" -> result.Add(Ascii.Token.NormalY)
-            | "nz" -> result.Add(Ascii.Token.NormalZ)
-            | "i" -> result.Add(Ascii.Token.Intensity)
-            | "r" -> result.Add(Ascii.Token.ColorR)
-            | "g" -> result.Add(Ascii.Token.ColorG)
-            | "b" -> result.Add(Ascii.Token.ColorB)
-            | "a" -> result.Add(Ascii.Token.ColorA)
-            | "rf" -> result.Add(Ascii.Token.ColorRf)
-            | "gf" -> result.Add(Ascii.Token.ColorGf)
-            | "bf" -> result.Add(Ascii.Token.ColorBf)
-            | "af" -> result.Add(Ascii.Token.ColorAf)
-            | "_" -> result.Add(Ascii.Token.Skip)
-            | _ -> failwith "unknown token"
-        result.ToArray()
-
-    let view (store : string) (id : string) (argv : string[]) =
-
-        let mutable useVulkan = true
-        let mutable showBoundsFileName = None
-        let mutable i = 0
-        while i < argv.Length do
-            match argv.[i] with
-            | "-gl" | "-ogl" -> useVulkan <- false
-            | "-sb" -> showBoundsFileName <- Some argv.[i + 1]
-                       i <- i + 1
-            | _ -> failwith (sprintf "unknown argument %s" argv.[i])
-
-            i <- i + 1
             
-
+    let view (store : string) (id : string) (args : Args) =
+    
         let boundsToShow =
-            match showBoundsFileName with
+            match args.showBoundsFileName with
             | Some filename -> parseBounds filename
             | None -> [| |]
             
@@ -251,8 +193,8 @@ module CmdLine =
         win.RenderTask <- (app.Runtime.CompileRender(win.FramebufferSignature, sg))
         win.Run()
 
-    let info (filename : string) (argv : string[]) =
-        init ()
+    let info (filename : string) (args : Args) =
+        initPointFileFormats ()
         let info = PointCloud.ParseFileInfo(filename, ImportConfig.Default)
         Console.WriteLine("filename      {0}", info.FileName)
         Console.WriteLine("format        {0}", info.Format.Description)
@@ -260,52 +202,23 @@ module CmdLine =
         Console.WriteLine("point count   {0:N0}", info.PointCount)
         Console.WriteLine("bounds        {0}", info.Bounds)
 
-    let import (filename : string) (store : string) (id : string) (argv : string[]) =
-
-        let mutable minDist = 0.0
-        let mutable asciiFormat = None
-
-        let mutable i = 0
-        while i < argv.Length do
-            match argv.[i] with
-            | "-md"
-            | "-mindist" -> minDist <- Double.Parse(argv.[i + 1])
-                            i <- i + 1
-            | "-ascii"   -> asciiFormat <- Some argv.[i + 1]
-                            i <- i + 1
-            | _ -> failwith (sprintf "unknown argument %s" argv.[i])
-
-            i <- i + 1
-
+    let import (filename : string) (store : string) (id : string) (args : Args) =
+    
         use store = PointCloud.OpenStore(store)
-
+        
         let cfg =
             ImportConfig.Default
                 .WithStorage(store)
                 .WithKey(id)
                 .WithVerbose(true)
-                .WithMinDist(minDist)
+                .WithMinDist(match args.minDist with | None -> 0.0 | Some x -> x)
         
-        init ()
+        initPointFileFormats ()
         
-        let ps = match asciiFormat with
+        let ps = match args.asciiFormat with
                  | None -> PointCloud.Import(filename, cfg)
-                 | Some f -> let chunks = Import.Ascii.Chunks(filename, getLineDefinitions f, cfg)
+                 | Some f -> let chunks = Import.Ascii.Chunks(filename, f, cfg)
                              PointCloud.Chunks(chunks, cfg)
 
         Console.WriteLine("point count   {0:N0}", ps.PointCount)
         Console.WriteLine("bounds        {0}", ps.BoundingBox)
-
-    let processArgs (argv : string[]) =
-        if argv.Length > 0 then
-            try
-                match argv.[0] with
-                | "view"   -> view argv.[1] argv.[2] (Array.skip 3 argv)
-                | "info"   -> info argv.[1] (Array.skip 2 argv)
-                | "import" -> import argv.[1] argv.[2] argv.[3] (Array.skip 4 argv)
-                | _        -> usage ()
-            with e ->
-                Log.line "%A" e
-                usage ()
-        else
-            usage ()

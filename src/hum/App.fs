@@ -1,4 +1,4 @@
-namespace humgui
+namespace hum
 
 open Aardvark.Application
 open Aardvark.Base
@@ -218,9 +218,21 @@ module App =
             body [] main
         )
 
-    let app =
+    let initialFromArgs (args : Args) =
+        match args.command with
+        | Some (View (store, key)) ->
+            let initial = match Store.tryOpenStore store with
+                          | Result.Ok newStore -> { initial with store = Some newStore }
+                          | _ -> initial
+            let initial = match Store.tryOpenPointSet initial key with
+                          | Result.Ok newPointSet -> {initial with pointSet = Some newPointSet }
+                          | _ -> initial
+            initial
+        | _ -> initial
+
+    let app args =
         {
-            initial = initial
+            initial = initialFromArgs args
             update = update
             view = view
             threads = fun _ -> ThreadPool.empty

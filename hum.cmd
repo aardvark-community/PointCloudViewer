@@ -1,1 +1,1 @@
-pub\humcli.exe %*
+pub\hum.exe %*

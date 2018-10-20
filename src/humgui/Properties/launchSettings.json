@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "humgui": {
-      "commandName": "Project",
-      "commandLineArgs": "-gl"
-    }
-  }
-}

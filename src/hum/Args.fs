@@ -18,17 +18,31 @@ open System
 open System.Globalization
 
 type ArgsCommand =
-    | Info
-    | Import
-    | View
+    /// Info filename
+    | Info of string
+    /// Import (filename, store, key)
+    | Import of string * string * string
+    /// View (store, key)
+    | View of string * string
     
 type Args =
     {
-        command     : Option<ArgsCommand>
-        useVulkan   : bool
-        port        : Option<int>
-        minDist     : Option<float>
-        asciiFormat : Option<Ascii.Token[]>
+        command             : Option<ArgsCommand>
+        useVulkan           : bool
+        port                : Option<int>
+
+        /// import command: minDist
+        minDist             : Option<float>
+        /// import command: format for ascii parser
+        asciiFormat         : Option<Ascii.Token[]>
+
+        /// view command: renders bounding boxes from given file 
+        showBoundsFileName  : Option<string>
+
+        /// near plane distance
+        nearPlane           : float
+        /// far plane distance
+        farPlane            : float
     }
 
 module Args =
@@ -39,8 +53,11 @@ module Args =
         port = None
         minDist = None
         asciiFormat = None
+        showBoundsFileName = None
+        nearPlane = 1.0
+        farPlane = 50000.0
     }
-
+    
     (* parse ascii-parser format string *)
     let rec private parseAsciiFormat' xs rs =
         match xs with
@@ -72,40 +89,47 @@ module Args =
     let rec private parse' (a : Args) (argv : string list) : Args =
         match argv with
         | [] -> a
-        | x :: xs ->
-            let a = match x with
-                    | "info" ->
-                        { a with command = Some Info }
+        | "info" :: filename :: xs
+            -> parse' { a with command = Some (Info filename) } xs
 
-                    | "import" ->
-                        { a with command = Some Import }
+        | "import" :: filename :: store :: key :: xs
+            -> parse' { a with command = Some (Import (filename, store, key)) } xs
 
-                    | "view" ->
-                        { a with command = Some View }
+        | "view" :: store :: key :: xs
+            -> parse' { a with command = Some (View (store, key)) } xs
 
-                    | "-opengl" | "-ogl" | "-gl" ->
-                        { a with useVulkan = false }
+        | "-opengl" :: xs
+        | "-ogl" :: xs
+        | "-gl" :: xs           -> parse' { a with useVulkan = false } xs
+        | "-vulkan" :: xs       -> parse' { a with useVulkan = true } xs
 
-                    | "-vulkan" ->
-                        { a with useVulkan = true }
+        | "-port" :: x :: xs
+        | "-p" :: x :: xs       -> parse' { a with port = Some (Int32.Parse x) } xs
+        | "-port" :: []         
+        | "-p" :: []            -> failwith "missing argument: -p <???>"
 
-                    | "-port" | "-p" ->
-                        { a with port = Some (Int32.Parse x) }
+        | "-mindist" :: x :: xs
+        | "-md" :: x :: xs      -> parse' { a with minDist = Some (Double.Parse(x, CultureInfo.InvariantCulture)) } xs
+        | "-mindist" :: []      
+        | "-md" :: []           -> failwith "missing argument: -md <???>"
 
-                    | "-mindist" | "-md" ->
-                        { a with minDist = Some (Double.Parse(x, CultureInfo.InvariantCulture)) }
+        | "-ascii" :: f :: xs   -> parse' { a with asciiFormat = Some (parseAsciiFormat f) } xs
+        | "-ascii" :: []        -> failwith "missing argument: -ascii <???>"
 
-                    | "-ascii" ->
-                        match xs with
-                        | [] -> failwith "missing argument: -ascii <???>"
-                        | f :: xs -> { a with asciiFormat = Some (parseAsciiFormat f) }
+        | "-near" :: x :: xs    -> parse' { a with nearPlane = Double.Parse(x, CultureInfo.InvariantCulture) } xs
+        | "-near" :: []         -> failwith "missing argument: -near <???>"
 
-                    | _
-                        -> failwith (sprintf "unknown argument %s" x)
-            parse' a xs
+        | "-far" :: x :: xs     -> parse' { a with farPlane = Double.Parse(x, CultureInfo.InvariantCulture) } xs
+        | "-far" :: []          -> failwith "missing argument: -far <???>"
         
-        
+        | "-sb" :: fn :: xs     -> parse' { a with showBoundsFileName = Some fn } xs
+        | "-sb" :: []           -> failwith "missing argument: -sb <???>"
 
+        | x :: _                -> printf "unknown argument '%s'" x
+                                   printUsage ()
+                                   Environment.Exit(1)
+                                   failwith "never reached, but makes compiler happy ;-)"
+        
     /// Parses command line arguments.
     let parse (argv : string[]) : Args =
         parse' defaultArgs (List.ofArray argv)

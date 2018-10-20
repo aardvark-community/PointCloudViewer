@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -16,6 +16,8 @@
   </PropertyGroup>
   <ItemGroup>
 
+    <Compile Include="Prelude.fs" />
+
     <Compile Include="Args.fs" />
 
     <Compile Include="Model.fs" />
@@ -27,6 +29,10 @@
     <Compile Include="Scene.fs" />
 
     <Compile Include="CmdLine.fs" />
+
+    <Compile Include="App.fs" />
+
+    <Compile Include="Main.fs" />
 
     <None Include="paket.references" />
   </ItemGroup>

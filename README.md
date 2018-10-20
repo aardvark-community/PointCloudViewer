@@ -18,13 +18,16 @@ Deploy executables `humcli.exe` and `humgui.exe` to `./pub` directory:
 publish
 ```
 
-## Command Line Interface
+## Usage
 
-Use `humcli` (or simply `hum`) to use the command line interface.
+Use `hum` to use the command line interface.
 
 ```sh
 usage: humcli <command> <args...>
     view <store> <id>               shows pointcloud with given <id> in given <store>
+        [-gl]                            uses OpenGL instead of Vulkan
+        [-near <dist>]                   near plane distance, e.g. -near 1.0
+        [-var <dist>]                    far plane distance, e.g. -far 2000.0
     info <filename>                 prints info (e.g. point count, bounding box, ...)
     import <filename> <store> <id>  imports <filename> into <store> with <id>
         [-mindist <dist>]              skips points on import, which are less than
@@ -33,14 +36,10 @@ usage: humcli <command> <args...>
                                          position      : x,y,z
                                          normal        : nx,ny,nz
                                          color         : r,g,b,a
-                                         color (float) : rf,gf,bf,af
+                                         color (float) : rf, gf, bf, af
                                          intensity     : i
                                          skip          : _
 ```
-
-## GUI
-
-Use `humgui` to start the graphical user interface.
 
 ## Licensing
 
