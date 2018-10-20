@@ -35,7 +35,7 @@ module Prelude =
         
     /// Print usage message.
     let printUsage () =
-        printfn "usage: humcli <command> <args...>"
+        printfn "usage: hum <command> <args...>"
         printfn "    view <store> <id>               shows pointcloud with given <id> in given <store>"
         printfn "        [-gl]                            uses OpenGL instead of Vulkan"
         printfn "        [-vulkan]                        uses Vulkan (default)"

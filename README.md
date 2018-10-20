@@ -1,4 +1,26 @@
-# hum - a viewer for *hum*ongous point clouds
+# hum - a viewer for *hum*ongous pointclouds
+
+**hum** let's you view and interactively explore pointclouds with billions of points.
+
+Supported file formats: `.las, .laz, .e57, .ply, .pts, .yxh, ascii`
+
+## Quickstart
+
+Import a pointcloud file with
+```sh
+hum import laserscan.laz path/to/my/store scan1
+```
+which will create a hum store at `path/to/my/store` and import `laserscan.laz` using key `scan1`.
+If no store exists at the given directory, then it will be created automatically.
+
+Now you can view the pointcloud with
+```sh
+hum view path/to/my/store scan1
+```
+
+**ProTip:** A store can hold multiple pointclouds. Just use different keys.
+
+**Advise** If your graphics card does not support Vulkan, use `-gl` to switch to OpenGL rendering.
 
 ## Build Instructions (Windows)
 
@@ -26,8 +48,9 @@ Use `hum` to use the command line interface.
 usage: humcli <command> <args...>
     view <store> <id>               shows pointcloud with given <id> in given <store>
         [-gl]                            uses OpenGL instead of Vulkan
+        [-vulkan]                        uses Vulkan (default)
         [-near <dist>]                   near plane distance, e.g. -near 1.0
-        [-var <dist>]                    far plane distance, e.g. -far 2000.0
+        [-far <dist>]                    far plane distance, e.g. -far 2000.0
     info <filename>                 prints info (e.g. point count, bounding box, ...)
     import <filename> <store> <id>  imports <filename> into <store> with <id>
         [-mindist <dist>]              skips points on import, which are less than
