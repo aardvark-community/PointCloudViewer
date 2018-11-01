@@ -45,16 +45,16 @@ publish
 ```
 usage: hum <command> <args...>
 
-    info <filename>                 prints point cloud file info
+    info <filename>                 print point cloud file info
 
-    import <filename> <store> <id>  imports <filename> into <store> with <id>
-        [-mindist <dist>]              skips points on import, which are less
+    import <filename> <store> <id>  import <filename> into <store> with <id>
+        [-mindist <dist>]              skip points on import, which are less
                                          than given distance from previous point,
                                          e.g. -mindist 0.001
         [-n <k>]                       estimate per-point normals
                                          using k-nearest neighbours,
                                          e.g. -n 16
-        [-ascii <lineformat>]          imports custom ascii format
+        [-ascii <lineformat>]          import custom ascii format
                                          e.g. -ascii "x y z _ r g b"
                                        format symbols
                                          position      : x, y, z
@@ -64,9 +64,9 @@ usage: hum <command> <args...>
                                          intensity     : i
                                          skip          : _
 
-    view <store> <id>               shows point cloud with <id> in given <store>
-        [-gl]                            uses OpenGL instead of Vulkan
-        [-vulkan]                        uses Vulkan (default)
+    view <store> <id>               show point cloud with <id> in given <store>
+        [-gl]                            use OpenGL instead of Vulkan
+        [-vulkan]                        use Vulkan (default)
         [-near <dist>]                   near plane distance, default 1.0
         [-far <dist>]                    far plane distance, default 5000.0
         [-fov <degrees>]                 horizontal field-of-view, default 60.0
@@ -78,11 +78,11 @@ usage: hum <command> <args...>
                                          <T>/<R> ... target pixel distance (+/-)
 
     download <baseurl> <targetdir>  bulk download of point cloud files
-                                      webpage at <baseurl> is scanned for hrefs
-                                      to files with known file extensions, which
-                                      are then downloaded to <targetdir>
+                                      scans webpage at <baseurl> for hrefs to
+                                      files with known file extensions and
+                                      download to <targetdir>
 
-    gui                             starts in GUI mode                            
+    gui                             start in GUI mode                          
 ```
 
 ## Licensing
