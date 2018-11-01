@@ -42,6 +42,7 @@ module Prelude =
         printfn "    import <filename> <store> <id>  imports <filename> into <store> with <id>"
         printfn "        [-mindist <dist>]              skips points on import, which are less than"
         printfn "                                         given distance from previous point, e.g. -mindist 0.001"
+        printfn "        [-n <k>]                       estimate per-point normals (k-nearest neighbours)"
         printfn "        [-ascii <format>]              e.g. -ascii \"x y z _ r g b\""
         printfn "                                         position      : x,y,z"
         printfn "                                         normal        : nx,ny,nz"
