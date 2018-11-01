@@ -1,19 +1,14 @@
-# hum - a viewer for *hum*ongous point clouds
+# hum – a viewer for **hum**ongous point clouds
 
-**hum** let's you view and interactively explore point clouds with billions of points.
-
-Supported file formats: `.las, .laz, .e57, .ply, .pts, .yxh, ascii`
+Supported file formats are `.las, .laz, .e57, .ply, .pts, .yxh, ascii`.
 
 ## Quickstart
 
-Import a point cloud file with
+Import a point cloud file
 ```
-hum import laserscan.laz path/to/my/store scan1
+hum import mylaserscan.laz path/to/my/store scan1
 ```
-which will create a hum store at `path/to/my/store` and import `laserscan.laz` using key `scan1`.
-If no store exists at the given directory, then it will be created automatically.
-
-Now you can view the point cloud with
+and view it like this:
 ```
 hum view path/to/my/store scan1
 ```
@@ -22,7 +17,7 @@ hum view path/to/my/store scan1
 
 **Advise** If your graphics card does not support Vulkan, use `-gl` to switch to OpenGL rendering.
 
-## Build Instructions (Windows)
+## Build Instructions
 
 Clone the repository:
 ```
