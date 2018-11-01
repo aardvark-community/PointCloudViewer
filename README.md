@@ -1,48 +1,46 @@
-# hum - a viewer for *hum*ongous pointclouds
+# hum - a viewer for *hum*ongous point clouds
 
-**hum** let's you view and interactively explore pointclouds with billions of points.
+**hum** let's you view and interactively explore point clouds with billions of points.
 
 Supported file formats: `.las, .laz, .e57, .ply, .pts, .yxh, ascii`
 
 ## Quickstart
 
-Import a pointcloud file with
-```sh
+Import a point cloud file with
+```
 hum import laserscan.laz path/to/my/store scan1
 ```
 which will create a hum store at `path/to/my/store` and import `laserscan.laz` using key `scan1`.
 If no store exists at the given directory, then it will be created automatically.
 
-Now you can view the pointcloud with
-```sh
+Now you can view the point cloud with
+```
 hum view path/to/my/store scan1
 ```
 
-**ProTip:** A store can hold multiple pointclouds. Just use different keys.
+**ProTip:** A store can hold multiple point clouds. Just use different keys.
 
 **Advise** If your graphics card does not support Vulkan, use `-gl` to switch to OpenGL rendering.
 
 ## Build Instructions (Windows)
 
 Clone the repository:
-```sh
+```
 git clone https://github.com/aardvark-community/hum.git
 cd hum
 ```
 
 Build the project:
-```sh
+```
 build
 ```
 
-Deploy executables `humcli.exe` and `humgui.exe` to `./pub` directory:
-```sh
+Deploys executable `hum.exe` to `./pub` directory:
+```
 publish
 ```
 
 ## Usage
-
-Use `hum` to use the command line interface.
 
 ```
 usage: hum <command> <args...>
@@ -66,7 +64,7 @@ usage: hum <command> <args...>
                                          intensity     : i
                                          skip          : _
 
-    view <store> <id>               shows pointcloud with <id> in given <store>
+    view <store> <id>               shows point cloud with <id> in given <store>
         [-gl]                            uses OpenGL instead of Vulkan
         [-vulkan]                        uses Vulkan (default)
         [-near <dist>]                   near plane distance, default 1.0

@@ -56,7 +56,7 @@ module Prelude =
         printfn "                                         intensity     : i"
         printfn "                                         skip          : _"
         printfn ""
-        printfn "    view <store> <id>               shows pointcloud with <id> in given <store>"
+        printfn "    view <store> <id>               shows point cloud with <id> in given <store>"
         printfn "        [-gl]                            uses OpenGL instead of Vulkan"
         printfn "        [-vulkan]                        uses Vulkan (default)"
         printfn "        [-near <dist>]                   near plane distance, default 1.0"
