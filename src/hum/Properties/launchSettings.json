@@ -1,7 +1,8 @@
 {
   "profiles": {
     "PointCloudViewer3": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "import \\\\space\\backup\\VRVis\\OpenTopography\\Haiti \\\\space\\backup\\VRVis\\OpenTopography\\Haiti\\Store Haiti"
     }
   }
 }

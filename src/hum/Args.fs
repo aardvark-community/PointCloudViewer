@@ -52,6 +52,11 @@ type Args =
         farPlane            : float
         /// horizontal field-of-view in degrees
         fov                 : float
+
+        /// batch import: skip n files
+        skip                : int
+        /// batch import: take n files
+        take                : int
     }
 
 module Args =
@@ -67,6 +72,8 @@ module Args =
         nearPlane = 1.0
         farPlane = 5000.0
         fov = 60.0
+        skip = 0
+        take = Int32.MaxValue
     }
     
     (* parse ascii-parser format string *)
@@ -148,6 +155,12 @@ module Args =
         
         | "-sb" :: fn :: xs     -> parse' { a with showBoundsFileName = Some fn } xs
         | "-sb" :: []           -> failwith "missing argument: -sb <???>"
+
+        | "-skip" :: n :: xs     -> parse' { a with skip = Int32.Parse n } xs
+        | "-skip" :: []          -> failwith "missing argument: -skip <???>"
+
+        | "-take" :: n :: xs     -> parse' { a with take = Int32.Parse n } xs
+        | "-take" :: []          -> failwith "missing argument: -take <???>"
 
         | x :: _                -> printf "unknown argument '%s'" x
                                    printUsage ()

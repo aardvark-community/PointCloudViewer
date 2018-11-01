@@ -15,6 +15,7 @@ namespace hum
 
 open System
 open System.Collections.Generic
+open System.IO
 open System.Linq
 open System.Threading
 open Aardvark.Base
@@ -206,8 +207,24 @@ module CmdLine =
         Console.WriteLine("point count   {0:N0}", info.PointCount)
         Console.WriteLine("bounds        {0}", info.Bounds)
 
+    let private mapReduce cfg (chunks : seq<Chunk>) = PointCloud.Chunks(chunks, cfg)
+    let private batchImport dirname (cfg : ImportConfig) (args : Args) =
+        getKnownFileExtensions ()
+        |> Seq.collect (fun x -> Directory.EnumerateFiles(dirname, "*" + x, SearchOption.AllDirectories))
+        |> Seq.skip args.skip
+        |> Seq.take args.take
+        |> Seq.collect (fun f ->
+            printfn "importing file %s" f
+            Import.Laszip.Chunks(f, cfg)
+            )
+        |> mapReduce cfg
+
     let import (filename : string) (store : string) (id : string) (args : Args) =
     
+        let isBatchImport =
+            try Directory.Exists(filename)
+            with _ -> false
+
         use store = PointCloud.OpenStore(store)
 
         let cfg =
@@ -215,14 +232,25 @@ module CmdLine =
                 .WithStorage(store)
                 .WithKey(id)
                 .WithVerbose(true)
+                .WithMaxChunkPointCount(100000000)
                 .WithMinDist(match args.minDist with | None -> 0.0 | Some x -> x)
         
         initPointFileFormats ()
         
-        let ps = match args.asciiFormat with
-                 | None -> PointCloud.Import(filename, cfg)
-                 | Some f -> let chunks = Import.Ascii.Chunks(filename, f, cfg)
-                             PointCloud.Chunks(chunks, cfg)
+        let ps =
+            match isBatchImport, args.asciiFormat with
+            // single file, known format
+            | false, None   -> PointCloud.Import(filename, cfg)
+                 
+            // single file, custom ascii
+            | false, Some f -> let chunks = Import.Ascii.Chunks(filename, f, cfg)
+                               PointCloud.Chunks(chunks, cfg)
+
+            // batch, known formats
+            | true, None    -> batchImport filename cfg args
+
+            // batch, custom ascii
+            | _             -> failwith "batch import with custom ascii format is not supported"
 
         Console.WriteLine("point count   {0:N0}", ps.PointCount)
         Console.WriteLine("bounds        {0}", ps.BoundingBox)
