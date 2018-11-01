@@ -24,6 +24,8 @@ type ArgsCommand =
     | Import of string * string * string
     /// View (store, key)
     | View of string * string
+    /// Download (baseurl, targetdir)
+    | Download of string * string
     
 type Args =
     {
@@ -35,6 +37,9 @@ type Args =
         minDist             : Option<float>
         /// import command: format for ascii parser
         asciiFormat         : Option<Ascii.Token[]>
+
+        // normal generation: k-nearest
+        k                   : Option<int>
 
         /// view command: renders bounding boxes from given file 
         showBoundsFileName  : Option<string>
@@ -53,6 +58,7 @@ module Args =
         port = None
         minDist = None
         asciiFormat = None
+        k = None
         showBoundsFileName = None
         nearPlane = 1.0
         farPlane = 50000.0
@@ -89,6 +95,7 @@ module Args =
     let rec private parse' (a : Args) (argv : string list) : Args =
         match argv with
         | [] -> a
+
         | "info" :: filename :: xs
             -> parse' { a with command = Some (Info filename) } xs
 
@@ -97,6 +104,9 @@ module Args =
 
         | "view" :: store :: key :: xs
             -> parse' { a with command = Some (View (store, key)) } xs
+
+        | "download" :: basedir :: targetdir :: xs
+            -> parse' { a with command = Some (Download (basedir, targetdir)) } xs
 
         | "-opengl" :: xs
         | "-ogl" :: xs
@@ -112,6 +122,9 @@ module Args =
         | "-md" :: x :: xs      -> parse' { a with minDist = Some (Double.Parse(x, CultureInfo.InvariantCulture)) } xs
         | "-mindist" :: []      
         | "-md" :: []           -> failwith "missing argument: -md <???>"
+
+        | "-n" :: k :: xs     -> parse' { a with k = Some (Int32.Parse k) } xs
+        | "-n" :: []          -> failwith "missing argument: -n <???>"
 
         | "-ascii" :: f :: xs   -> parse' { a with asciiFormat = Some (parseAsciiFormat f) } xs
         | "-ascii" :: []        -> failwith "missing argument: -ascii <???>"

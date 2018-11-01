@@ -37,16 +37,21 @@ module Prelude =
     let printUsage () =
         printfn "usage: hum <command> <args...>"
         printfn ""
-        printfn "    info <filename>                 prints file info (e.g. point count, bounding box, ...)"
+        printfn "    info <filename>                 prints point cloud file info"
         printfn ""
         printfn "    import <filename> <store> <id>  imports <filename> into <store> with <id>"
-        printfn "        [-mindist <dist>]              skips points on import, which are less than"
-        printfn "                                         given distance from previous point, e.g. -mindist 0.001"
-        printfn "        [-n <k>]                       estimate per-point normals (k-nearest neighbours)"
-        printfn "        [-ascii <format>]              e.g. -ascii \"x y z _ r g b\""
-        printfn "                                         position      : x,y,z"
-        printfn "                                         normal        : nx,ny,nz"
-        printfn "                                         color         : r,g,b,a"
+        printfn "        [-mindist <dist>]              skips points on import, which are less"
+        printfn "                                         than given distance from previous point,"
+        printfn "                                         e.g. -mindist 0.001"
+        printfn "        [-n <k>]                       estimate per-point normals"
+        printfn "                                         using k-nearest neighbours,"
+        printfn "                                         e.g. -n 16"
+        printfn "        [-ascii <lineformat>]          imports custom ascii format"
+        printfn "                                         e.g. -ascii \"x y z _ r g b\""
+        printfn "                                       format symbols"
+        printfn "                                         position      : x, y, z"
+        printfn "                                         normal        : nx, ny, nz"
+        printfn "                                         color         : r, g, b, a"
         printfn "                                         color (float) : rf, gf, bf, af"
         printfn "                                         intensity     : i"
         printfn "                                         skip          : _"
@@ -62,12 +67,27 @@ module Prelude =
         printfn "                                         <+>/<-> ... camera speed"
         printfn "                                         <P>/<Q> ... point size"
         printfn "                                         <T>/<R> ... target pixel distance"
+        printfn ""
+        printfn "    download <baseurl> <targetdir>  bulk download of point cloud files"
+        printfn "                                      webpage at <baseurl> is scanned for hrefs"
+        printfn "                                      to files with known file extensions, which"
+        printfn "                                      are then downloaded to <targetdir>"
+
+    let private formats = [
+        Pts.PtsFormat
+        E57.E57Format
+        Yxh.YxhFormat
+        Ply.PlyFormat
+        Laszip.LaszipFormat
+        ]
 
     /// Init point cloud file formats.
-    let initPointFileFormats () =
-        Pts.PtsFormat |> ignore
-        E57.E57Format |> ignore
-        Yxh.YxhFormat |> ignore
-        Ply.PlyFormat |> ignore
-        Laszip.LaszipFormat |> ignore
+    let initPointFileFormats () = for x in formats do x |> ignore
+
+    /// Known file extensions.
+    let getKnownFileExtensions () =
+        formats
+        |> List.collect (fun x -> x.FileExtensions |> List.ofArray)
+        |> List.map (fun x -> x.ToLowerInvariant())
+        
   

@@ -14,8 +14,9 @@
 namespace hum
 
 open System
-open System.Threading
 open System.Collections.Generic
+open System.Linq
+open System.Threading
 open Aardvark.Base
 open Aardvark.Base.Incremental
 open Aardvark.Base.Rendering
@@ -208,7 +209,7 @@ module CmdLine =
     let import (filename : string) (store : string) (id : string) (args : Args) =
     
         use store = PointCloud.OpenStore(store)
-        
+
         let cfg =
             ImportConfig.Default
                 .WithStorage(store)
@@ -225,3 +226,9 @@ module CmdLine =
 
         Console.WriteLine("point count   {0:N0}", ps.PointCount)
         Console.WriteLine("bounds        {0}", ps.BoundingBox)
+
+    let download (baseurl : string) (targetdir : string) (args : Args) =
+
+        let xs = Download.listHrefsForKnownFormats baseurl
+        Console.WriteLine("found {0:N0} point cloud files", xs.Count())
+        Download.batchDownload baseurl targetdir xs

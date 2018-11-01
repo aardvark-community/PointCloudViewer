@@ -18,8 +18,6 @@
 
     <Compile Include="Prelude.fs" />
 
-    <Compile Include="Download.fs" />
-
     <Compile Include="Args.fs" />
 
     <Compile Include="Model.fs" />
@@ -29,6 +27,8 @@
     <Compile Include="Rendering.fs" />
 
     <Compile Include="Scene.fs" />
+
+    <Compile Include="Download.fs" />
 
     <Compile Include="CmdLine.fs" />
 

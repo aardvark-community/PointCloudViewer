@@ -65,6 +65,7 @@ module Main =
             match args.port with
             | None -> view store key args
             | Some port -> startMediaApp port args
+        | Some (Download (baseurl, targetdir)) -> download baseurl targetdir args
             
         0
   
