@@ -48,6 +48,8 @@ type Args =
         nearPlane           : float
         /// far plane distance
         farPlane            : float
+        /// horizontal field-of-view in degrees
+        fov                 : float
     }
 
 module Args =
@@ -61,7 +63,8 @@ module Args =
         k = None
         showBoundsFileName = None
         nearPlane = 1.0
-        farPlane = 50000.0
+        farPlane = 5000.0
+        fov = 60.0
     }
     
     (* parse ascii-parser format string *)
@@ -134,6 +137,9 @@ module Args =
 
         | "-far" :: x :: xs     -> parse' { a with farPlane = Double.Parse(x, CultureInfo.InvariantCulture) } xs
         | "-far" :: []          -> failwith "missing argument: -far <???>"
+
+        | "-fov" :: x :: xs     -> parse' { a with fov = Double.Parse(x, CultureInfo.InvariantCulture) } xs
+        | "-fov" :: []          -> failwith "missing argument: -fov <???>"
         
         | "-sb" :: fn :: xs     -> parse' { a with showBoundsFileName = Some fn } xs
         | "-sb" :: []           -> failwith "missing argument: -sb <???>"

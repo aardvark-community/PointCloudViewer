@@ -45,43 +45,44 @@ publish
 Use `hum` to use the command line interface.
 
 ```sh
-usage: hum <command> <args...>                                                  
-                                                                                
-    info <filename>                 prints point cloud file info                
-                                                                                
-    import <filename> <store> <id>  imports <filename> into <store> with <id>   
-        [-mindist <dist>]              skips points on import, which are less   
-                                         than given distance from previous point
-                                         e.g. -mindist 0.001                    
-        [-n <k>]                       estimate per-point normals               
-                                         using k-nearest neighbours,            
-                                         e.g. -n 16                             
-        [-ascii <lineformat>]          imports custom ascii format              
-                                         e.g. -ascii "x y z _ r g b"            
-                                       format symbols                           
-                                         position      : x, y, z                
-                                         normal        : nx, ny, nz             
-                                         color         : r, g, b, a             
-                                         color (float) : rf, gf, bf, af         
-                                         intensity     : i                      
-                                         skip          : _                      
-                                                                                
-    view <store> <id>               shows pointcloud with <id> in given <store> 
-        [-gl]                            uses OpenGL instead of Vulkan          
-        [-vulkan]                        uses Vulkan (default)                  
-        [-near <dist>]                   near plane distance, e.g. -near 1.0    
-        [-far <dist>]                    far plane distance, e.g. -far 2000.0   
-                                    keyboard shortcuts                          
-                                         <A>/<D> ... left/right                 
-                                         <W>/<S> ... forward/back               
-                                         <+>/<-> ... camera speed               
-                                         <P>/<Q> ... point size                 
-                                         <T>/<R> ... target pixel distance      
-                                                                                
-    download <baseurl> <targetdir>  bulk download of point cloud files          
-                                      webpage at <baseurl> is scanned for hrefs 
+usage: hum <command> <args...>
+
+    info <filename>                 prints point cloud file info
+
+    import <filename> <store> <id>  imports <filename> into <store> with <id>
+        [-mindist <dist>]              skips points on import, which are less
+                                         than given distance from previous point,
+                                         e.g. -mindist 0.001
+        [-n <k>]                       estimate per-point normals
+                                         using k-nearest neighbours,
+                                         e.g. -n 16
+        [-ascii <lineformat>]          imports custom ascii format
+                                         e.g. -ascii "x y z _ r g b"
+                                       format symbols
+                                         position      : x, y, z
+                                         normal        : nx, ny, nz
+                                         color         : r, g, b, a
+                                         color (float) : rf, gf, bf, af
+                                         intensity     : i
+                                         skip          : _
+
+    view <store> <id>               shows pointcloud with <id> in given <store>
+        [-gl]                            uses OpenGL instead of Vulkan
+        [-vulkan]                        uses Vulkan (default)
+        [-near <dist>]                   near plane distance, default 1.0
+        [-far <dist>]                    far plane distance, default 5000.0
+        [-fov <degrees>]                 horizontal field-of-view, default 60.0
+                                    keyboard shortcuts
+                                         <A>/<D> ... left/right
+                                         <W>/<S> ... forward/back
+                                         <+>/<-> ... camera speed
+                                         <P>/<Q> ... point size
+                                         <T>/<R> ... target pixel distance
+
+    download <baseurl> <targetdir>  bulk download of point cloud files
+                                      webpage at <baseurl> is scanned for hrefs
                                       to files with known file extensions, which
-                                      are then downloaded to <targetdir>        
+                                      are then downloaded to <targetdir>     
 ```
 
 ## Licensing

@@ -63,7 +63,7 @@ module CmdLine =
         let view = initialView |> DefaultCameraController.controlWithSpeed speed win.Mouse win.Keyboard win.Time
         let viewTrafo = view |> Mod.map CameraView.viewTrafo
 
-        let proj = win.Sizes |> Mod.map (fun s -> Frustum.perspective 60.0 1.0 50000.0 (float s.X / float s.Y))
+        let proj = win.Sizes |> Mod.map (fun s -> Frustum.perspective args.fov args.nearPlane args.farPlane (float s.X / float s.Y))
         let projTrafo = proj |> Mod.map Frustum.projTrafo
         
         let tpd = Mod.init 1.5
