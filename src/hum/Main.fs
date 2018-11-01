@@ -59,13 +59,21 @@ module Main =
 
         match args.command with
         | None -> printUsage ()
+
         | Some (Info filename) -> info filename args
+
         | Some (Import (filename, store, key)) -> import filename store key args
+        
         | Some (View (store, key)) ->
             match args.port with
             | None -> view store key args
             | Some port -> startMediaApp port args
+        
+        | Some Gui ->
+            let port = match args.port with | Some p -> p | None -> 5432 
+            startMediaApp port args
+        
         | Some (Download (baseurl, targetdir)) -> download baseurl targetdir args
-            
+        
         0
   

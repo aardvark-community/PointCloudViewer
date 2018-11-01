@@ -26,6 +26,8 @@ type ArgsCommand =
     | View of string * string
     /// Download (baseurl, targetdir)
     | Download of string * string
+    /// Open GUI
+    | Gui
     
 type Args =
     {
@@ -110,6 +112,9 @@ module Args =
 
         | "download" :: basedir :: targetdir :: xs
             -> parse' { a with command = Some (Download (basedir, targetdir)) } xs
+
+        | "gui" :: xs
+            -> parse' { a with command = Some Gui } xs
 
         | "-opengl" :: xs
         | "-ogl" :: xs

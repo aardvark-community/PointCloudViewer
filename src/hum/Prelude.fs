@@ -73,6 +73,8 @@ module Prelude =
         printfn "                                      webpage at <baseurl> is scanned for hrefs"
         printfn "                                      to files with known file extensions, which"
         printfn "                                      are then downloaded to <targetdir>"
+        printfn ""
+        printfn "    gui                             starts in GUI mode"
 
     let private formats = [
         Pts.PtsFormat
