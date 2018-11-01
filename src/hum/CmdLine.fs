@@ -169,24 +169,27 @@ module CmdLine =
         // keyboard bindings
         win.Keyboard.Down.Values.Add ( fun k ->
             match k with
-            | Keys.U -> 
-                transact ( fun _ -> tpd.Value <- tpd.Value * 1.5)
-                Log.line "TargetPixelDistance: %f" tpd.Value
-            | Keys.I -> 
-                transact ( fun _ -> tpd.Value <- tpd.Value / 1.5)
-                Log.line "TargetPixelDistance: %f" tpd.Value
-            | Keys.O -> 
-                transact ( fun _ -> pss.Value <- pss.Value * 1.5)
-                Log.line "PointSize: %f" pss.Value
             | Keys.P -> 
-                transact ( fun _ -> pss.Value <- pss.Value / 1.5)
+                transact ( fun _ -> pss.Value <- pss.Value * 1.25)
                 Log.line "PointSize: %f" pss.Value
-            | Keys.K -> 
-                transact ( fun _ -> speed.Value <- speed.Value * 1.5)
+            | Keys.O -> 
+                transact ( fun _ -> pss.Value <- pss.Value / 1.25)
+                Log.line "PointSize: %f" pss.Value
+
+            | Keys.T -> 
+                transact ( fun _ -> tpd.Value <- tpd.Value * 1.25)
+                Log.line "TargetPixelDistance: %f" tpd.Value
+            | Keys.R -> 
+                transact ( fun _ -> tpd.Value <- tpd.Value / 1.25)
+                Log.line "TargetPixelDistance: %f" tpd.Value
+            
+            | Keys.OemPlus -> 
+                transact ( fun _ -> speed.Value <- speed.Value * 1.25)
                 Log.line "CameraSpeed: %f" speed.Value
-            | Keys.L -> 
-                transact ( fun _ -> speed.Value <- speed.Value / 1.5)
+            | Keys.OemMinus ->
+                transact ( fun _ -> speed.Value <- speed.Value / 1.25)
                 Log.line "CameraSpeed: %f" speed.Value
+
             | _ -> ()
         )
 

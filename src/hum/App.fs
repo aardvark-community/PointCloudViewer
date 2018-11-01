@@ -96,10 +96,34 @@ module App =
             | KeyDown k ->
                 Log.line "[KeyDown] %A" k
                 match k with
-                | Keys.P ->  { m with pointSize = m.pointSize * 1.25 }
-                | Keys.O ->  { m with pointSize = m.pointSize / 1.25 }
-                | Keys.T ->  { m with targetPixelDistance = m.targetPixelDistance * 1.25 }
-                | Keys.R ->  { m with targetPixelDistance = m.targetPixelDistance / 1.25 }
+                
+                | Keys.P ->
+                    let x = m.pointSize * 1.25
+                    Log.line "PointSize: %f" x
+                    { m with pointSize = x }
+                | Keys.O ->
+                    let x = m.pointSize / 1.25
+                    Log.line "PointSize: %f" x
+                    { m with pointSize = x }
+
+                | Keys.T ->
+                    let x = m.targetPixelDistance * 1.25
+                    Log.line "TargetPixelDistance: %f" x
+                    { m with targetPixelDistance = x }
+                | Keys.R ->
+                    let x = m.targetPixelDistance / 1.25
+                    Log.line "TargetPixelDistance: %f" x
+                    { m with targetPixelDistance = x }
+
+                | Keys.OemPlus -> 
+                    let x = m.cameraState.moveSpeed * 1.25
+                    Log.line "CameraSpeed: %f" x
+                    { m with cameraState = { m.cameraState with moveSpeed = x } }
+                | Keys.OemMinus ->
+                    let x = m.cameraState.moveSpeed / 1.25
+                    Log.line "CameraSpeed: %f" x
+                    { m with cameraState = { m.cameraState with moveSpeed = x } }
+
                 | _ -> m
                 
             | KeyUp k ->

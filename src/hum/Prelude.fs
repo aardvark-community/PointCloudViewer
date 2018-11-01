@@ -36,12 +36,9 @@ module Prelude =
     /// Print usage message.
     let printUsage () =
         printfn "usage: hum <command> <args...>"
-        printfn "    view <store> <id>               shows pointcloud with given <id> in given <store>"
-        printfn "        [-gl]                            uses OpenGL instead of Vulkan"
-        printfn "        [-vulkan]                        uses Vulkan (default)"
-        printfn "        [-near <dist>]                   near plane distance, e.g. -near 1.0"
-        printfn "        [-far <dist>]                    far plane distance, e.g. -far 2000.0"
-        printfn "    info <filename>                 prints info (e.g. point count, bounding box, ...)"
+        printfn ""
+        printfn "    info <filename>                 prints file info (e.g. point count, bounding box, ...)"
+        printfn ""
         printfn "    import <filename> <store> <id>  imports <filename> into <store> with <id>"
         printfn "        [-mindist <dist>]              skips points on import, which are less than"
         printfn "                                         given distance from previous point, e.g. -mindist 0.001"
@@ -52,6 +49,18 @@ module Prelude =
         printfn "                                         color (float) : rf, gf, bf, af"
         printfn "                                         intensity     : i"
         printfn "                                         skip          : _"
+        printfn ""
+        printfn "    view <store> <id>               shows pointcloud with <id> in given <store>"
+        printfn "        [-gl]                            uses OpenGL instead of Vulkan"
+        printfn "        [-vulkan]                        uses Vulkan (default)"
+        printfn "        [-near <dist>]                   near plane distance, e.g. -near 1.0"
+        printfn "        [-far <dist>]                    far plane distance, e.g. -far 2000.0"
+        printfn "                                    keyboard shortcuts"
+        printfn "                                         <A>/<D> ... left/right"
+        printfn "                                         <W>/<S> ... forward/back"
+        printfn "                                         <+>/<-> ... camera speed"
+        printfn "                                         <P>/<Q> ... point size"
+        printfn "                                         <T>/<R> ... target pixel distance"
 
     /// Init point cloud file formats.
     let initPointFileFormats () =
