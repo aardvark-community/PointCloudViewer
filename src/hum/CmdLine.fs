@@ -17,6 +17,7 @@ open System
 open System.Collections.Generic
 open System.IO
 open System.Linq
+open System.Net
 open System.Threading
 open Aardvark.Base
 open Aardvark.Base.Incremental
@@ -221,12 +222,23 @@ module CmdLine =
 
     let import (filename : string) (store : string) (id : string) (args : Args) =
     
-        let isBatchImport =
-            try Directory.Exists(filename)
-            with _ -> false
+        let isBatchImport = try Directory.Exists(filename) with _ -> false
 
+        let filename =
+            if filename.StartsWith "http" then
+                if not (Directory.Exists(store)) then
+                    Directory.CreateDirectory(store) |> ignore
+                let wc = new WebClient()
+                let fn = Uri(filename).Segments.Last()
+                let targetFilename = Path.Combine(store, fn)
+                printfn "downloading %s to %s" filename targetFilename
+                wc.DownloadFile(filename, targetFilename)
+                targetFilename
+            else
+                filename
+            
         use store = PointCloud.OpenStore(store)
-
+        
         let cfg =
             ImportConfig.Default
                 .WithStorage(store)
@@ -239,6 +251,7 @@ module CmdLine =
         
         let ps =
             match isBatchImport, args.asciiFormat with
+            
             // single file, known format
             | false, None   -> PointCloud.Import(filename, cfg)
                  
