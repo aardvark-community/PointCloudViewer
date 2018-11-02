@@ -15,7 +15,7 @@ hum view path/to/my/store scan1
 
 **ProTip:** A store can hold multiple point clouds. Just use different keys.
 
-**Advise** If your graphics card does not support Vulkan, use `-gl` to switch to OpenGL rendering.
+**Advise:** If your graphics card does not support Vulkan, use `-gl` to switch to OpenGL rendering.
 
 ## Build Instructions
 

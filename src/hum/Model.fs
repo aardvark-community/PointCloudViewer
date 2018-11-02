@@ -28,13 +28,14 @@ type Primitive =
 [<DomainType>]
 type Model =
     {
-        cameraState         : CameraControllerState
+        cameraState                     : CameraControllerState
 
-        store               : Option<Storage>
-        pointSet            : Option<PointSet>
+        store                           : Option<Storage>
+        pointSet                        : Option<PointSet>
 
-        createLod           : bool
+        createLod                       : bool
 
-        pointSize           : float
-        targetPixelDistance : float
+        pointSize                       : float
+        targetPixelDistance             : float
+        useClassificationForColoring    : bool
     }

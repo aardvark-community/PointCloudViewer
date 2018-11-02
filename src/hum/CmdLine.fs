@@ -212,7 +212,7 @@ module CmdLine =
         getKnownFileExtensions ()
         |> Seq.collect (fun x -> Directory.EnumerateFiles(dirname, "*" + x, SearchOption.AllDirectories))
         |> Seq.skip args.skip
-        |> Seq.take args.take
+        |> Seq.truncate args.take
         |> Seq.collect (fun f ->
             printfn "importing file %s" f
             Import.Laszip.Chunks(f, cfg)
@@ -232,7 +232,7 @@ module CmdLine =
                 .WithStorage(store)
                 .WithKey(id)
                 .WithVerbose(true)
-                .WithMaxChunkPointCount(100000000)
+                .WithMaxChunkPointCount(10000000)
                 .WithMinDist(match args.minDist with | None -> 0.0 | Some x -> x)
         
         initPointFileFormats ()

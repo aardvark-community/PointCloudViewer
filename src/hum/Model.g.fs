@@ -19,6 +19,7 @@ module Mutable =
         let _createLod = ResetMod.Create(__initial.createLod)
         let _pointSize = ResetMod.Create(__initial.pointSize)
         let _targetPixelDistance = ResetMod.Create(__initial.targetPixelDistance)
+        let _useClassificationForColoring = ResetMod.Create(__initial.useClassificationForColoring)
         
         member x.cameraState = _cameraState
         member x.store = _store :> IMod<_>
@@ -26,6 +27,7 @@ module Mutable =
         member x.createLod = _createLod :> IMod<_>
         member x.pointSize = _pointSize :> IMod<_>
         member x.targetPixelDistance = _targetPixelDistance :> IMod<_>
+        member x.useClassificationForColoring = _useClassificationForColoring :> IMod<_>
         
         member x.Current = __current :> IMod<_>
         member x.Update(v : hum.Model.Model) =
@@ -38,6 +40,7 @@ module Mutable =
                 ResetMod.Update(_createLod,v.createLod)
                 ResetMod.Update(_pointSize,v.pointSize)
                 ResetMod.Update(_targetPixelDistance,v.targetPixelDistance)
+                ResetMod.Update(_useClassificationForColoring,v.useClassificationForColoring)
                 
         
         static member Create(__initial : hum.Model.Model) : MModel = MModel(__initial)
@@ -89,4 +92,10 @@ module Mutable =
                     override x.Get(r) = r.targetPixelDistance
                     override x.Set(r,v) = { r with targetPixelDistance = v }
                     override x.Update(r,f) = { r with targetPixelDistance = f r.targetPixelDistance }
+                }
+            let useClassificationForColoring =
+                { new Lens<hum.Model.Model, System.Boolean>() with
+                    override x.Get(r) = r.useClassificationForColoring
+                    override x.Set(r,v) = { r with useClassificationForColoring = v }
+                    override x.Update(r,f) = { r with useClassificationForColoring = f r.useClassificationForColoring }
                 }

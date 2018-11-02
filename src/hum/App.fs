@@ -55,6 +55,7 @@ module App =
         createLod = true
         pointSize = 1.0
         targetPixelDistance = 1.0
+        useClassificationForColoring = false
     }
     
     let update (m : Model) (msg : Message) =
