@@ -24,18 +24,23 @@ type Primitive =
     | Box
     | Sphere
 
+type PointColoring =
+    | Colors  = 0
+    | Labels  = 1
+    | Normals = 2
+    //| Intensities = 3 
 
 [<DomainType>]
 type Model =
     {
-        cameraState                     : CameraControllerState
+        cameraState             : CameraControllerState
 
-        store                           : Option<Storage>
-        pointSet                        : Option<PointSet>
+        store                   : Option<Storage>
+        pointSet                : Option<PointSet>
 
-        createLod                       : bool
+        createLod               : bool
 
-        pointSize                       : float
-        targetPixelDistance             : float
-        useClassificationForColoring    : bool
+        pointSize               : float
+        targetPixelDistance     : float
+        coloring                : PointColoring
     }

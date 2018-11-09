@@ -55,7 +55,7 @@ module App =
         createLod = true
         pointSize = 1.0
         targetPixelDistance = 1.0
-        useClassificationForColoring = false
+        coloring = PointColoring.Colors
     }
     
     let update (m : Model) (msg : Message) =
@@ -124,6 +124,16 @@ module App =
                     let x = m.cameraState.moveSpeed / 1.25
                     Log.line "CameraSpeed: %f" x
                     { m with cameraState = { m.cameraState with moveSpeed = x } }
+
+                | Keys.C ->
+                    let x =
+                        match m.coloring with
+                        | PointColoring.Colors -> PointColoring.Labels
+                        | PointColoring.Labels -> PointColoring.Normals
+                        | PointColoring.Normals -> PointColoring.Colors
+                        | _ -> PointColoring.Colors
+                    Log.line "PointColoring: %s" (x.ToString())
+                    { m with coloring = x }
 
                 | _ -> m
                 

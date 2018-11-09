@@ -17,16 +17,11 @@ open System
 open Aardvark.Base
 open Aardvark.Base.Rendering
 open Aardvark.Geometry.Points
+open Aardvark.Base.Incremental
 
 module Lod =
     open hum.Model
     
-    let private colorScheme =
-        let r = new Random()
-        let rgb = [| 0uy; 0uy; 0uy |]
-        Array.create 256 C4b.White
-        |> Array.map (fun _ -> r.NextBytes(rgb); C4b(rgb.[0], rgb.[1], rgb.[2]))
-
     type OctreeILodDataNode( globalCenter : V3d, node : PersistentRef<PointSetNode>, level : int ) =
         member x.Identifier = node.Value.Id
         member x.Node = node.Value :> obj
@@ -65,8 +60,7 @@ module Lod =
         let globalCenter = ps.BoundingBox.Center
         
         let root = lazy ( OctreeILodDataNode(globalCenter, ps.Root,0) :> ILodDataNode )
-
-
+        
         member x.BoundingBox = ps.BoundingBox
 
         member x.RootNode() = root.Value
@@ -77,18 +71,35 @@ module Lod =
             async {
                 let realNode = unbox<PointSetNode> node.Id
                 let shiftGlobal = realNode.Center - globalCenter
+                
                 let pos = realNode.LodPositions.Value  |> Array.map(fun p -> V4f(V3f(shiftGlobal + (V3d p)), 1.0f))
-                let col = match realNode.HasLodColors, realNode.HasLodClassifications with
-                          | true , _ -> realNode.LodColors.Value
-                          | _    , true  -> realNode.LodClassifications.Value |> Array.map (fun c -> colorScheme.[int(c)])
-                          | false, false -> realNode.LodPositions.Value |> Array.map (fun _ -> C4b.Gray)
+                //let normals = 
+                //    match realNode.HasNormals with
+                //    | true -> realNode.LodNormals.Value |> Array.map(fun p -> V4f(p, 0.0f))
+                //    | false -> [| |]
+
+                //let labels =
+                //    match realNode.HasLodClassifications with
+                //    | true -> realNode.LodClassifications.Value |> Array.map (fun c -> int(c))
+                //    | false -> [| |]
+        
+                let colors = 
+                    match realNode.HasLodColors with
+                    | true -> realNode.LodColors.Value
+                    | false -> [| |]
+                    
+                //let col = match realNode.HasLodColors, realNode.HasLodClassifications with
+                //          | true , _ -> realNode.LodColors.Value
+                //          | _    , true  -> realNode.LodClassifications.Value |> Array.map (fun c -> colorScheme.[int(c)])
+                //          | false, false -> realNode.LodPositions.Value |> Array.map (fun _ -> C4b.Gray)
+                
                 let r = 
                     IndexedGeometry(
                         Mode = IndexedGeometryMode.PointList,
                         IndexedAttributes =
                             SymDict.ofList [
                                 DefaultSemantic.Positions, pos :> Array
-                                DefaultSemantic.Colors, col :> Array
+                                DefaultSemantic.Colors, colors :> Array
                             ]
                     )
                 return Some r

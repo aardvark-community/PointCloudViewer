@@ -52,6 +52,7 @@ module CmdLine =
             | None -> [| |]
             
         //init ()
+
         let store = PointCloud.OpenStore(store)
         let ps = store.GetPointSet(id, CancellationToken.None)
         let data = Lod.OctreeLodData(ps)
@@ -63,7 +64,10 @@ module CmdLine =
         use app = new OpenGlApplication()
         let win = app.CreateGameWindow(8)
         win.Title <- "hum - a viewer for humongous point clouds"
+        
         let speed = 10.0 |> Mod.init
+        let coloring = Model.PointColoring.Colors |> Mod.init
+
         let initialView = CameraView.lookAt V3d.OIO V3d.Zero V3d.OOI
         let view = initialView |> DefaultCameraController.controlWithSpeed speed win.Mouse win.Keyboard win.Time
         let viewTrafo = view |> Mod.map CameraView.viewTrafo
@@ -109,6 +113,7 @@ module CmdLine =
                 |> Sg.effect Surfaces.pointsprite
                 |> Sg.uniform "PointSize" pss
                 |> Sg.uniform "ViewportSize" win.Sizes
+                |> Sg.uniform "PointColoring" coloring
 
         let coordinateCross = 
             let cross =
@@ -196,6 +201,17 @@ module CmdLine =
                 transact ( fun _ -> speed.Value <- speed.Value / 1.25)
                 Log.line "CameraSpeed: %f" speed.Value
 
+            | Keys.C ->
+                transact ( fun _ ->
+                    coloring.Value <-
+                        match coloring.Value with
+                        | Model.PointColoring.Colors -> Model.PointColoring.Labels
+                        | Model.PointColoring.Labels -> Model.PointColoring.Normals
+                        | Model.PointColoring.Normals -> Model.PointColoring.Colors
+                        | _ -> Model.PointColoring.Colors
+                )
+                Log.line "PointColoring: %s" (coloring.Value.ToString())
+                
             | _ -> ()
         )
 

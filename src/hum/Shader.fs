@@ -18,6 +18,7 @@ open Aardvark.Base
 open Aardvark.Base.Rendering
 open FShade
 
+
 type BillboardVertex =
     {
         [<Position>] position                           : V4d
@@ -25,24 +26,62 @@ type BillboardVertex =
         [<PointCoord>] texCoord                         : V2d
         [<SemanticAttribute("ViewPosition")>] viewPos   : V4d
         [<PointSize>] size                              : float
+        //[<Normal>] label                                : int
     }
 
 module Surfaces = 
+    open System
+
+    let private colorScheme =
+        let r = new Random()
+        
+        let randomColors = 
+            List.init 256 (fun _ -> V4d(r.Next(1,256), r.Next(1,256),r.Next(1,256),1))
+
+        let first10Colors = 
+            [ 
+                C4b.White.ToC4d().ToV4d();
+                C4b.Blue.ToC4d().ToV4d();
+                C4b.Green.ToC4d().ToV4d();
+                C4b.DarkYellow.ToC4d().ToV4d();
+                C4b.Cyan.ToC4d().ToV4d();
+                C4b.Blue.ToC4d().ToV4d();
+                C4b.Red.ToC4d().ToV4d();
+                C4b.Gray.ToC4d().ToV4d();
+                C4b.Magenta.ToC4d().ToV4d();
+                C4b.Yellow.ToC4d().ToV4d();
+            ]
+
+        List.append first10Colors randomColors |> List.toArray
     
     let pointsprite =
+        let BillboardColoring ( v : BillboardVertex ) =
+            vertex {
+                
+                let colorType = uniform?PointColoring
+                
+                let nc = 
+                    match colorType with
+                    | Model.PointColoring.Colors -> v.color
+                    | Model.PointColoring.Labels -> v.color//colorScheme.[v.label]
+                    | Model.PointColoring.Normals -> v.color
+                    | _ -> v.color
+
+                return { v with color = nc }
+            }
+
         let BillboardPosExtract ( v : BillboardVertex ) =
             vertex {
-
                 return { 
                     position = V4d(v.position.XYZ, 1.0)
-                    color = v.color                    
+                    color = v.color 
+                    //label = v.label
                     texCoord = V2d.OO
                     viewPos = v.viewPos
                     size = uniform?PointSize
-                }
-                    
+                }    
             }
-
+            
         let BillboardTrafo (v : BillboardVertex) =
             vertex {
                 let viewPos = uniform.ModelViewTrafo * v.position
@@ -50,6 +89,7 @@ module Surfaces =
                 return {
                     position = uniform.ProjTrafo * viewPos
                     color = v.color
+                    //label = v.label
                     texCoord = V2d.OO
                     viewPos = viewPos
                     size = v.size
@@ -86,6 +126,7 @@ module Surfaces =
             } 
 
         [
+            BillboardColoring |> toEffect
             BillboardPosExtract|> toEffect
             DefaultSurfaces.trafo     |> toEffect
             DefaultSurfaces.vertexColor  |> toEffect

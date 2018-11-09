@@ -21,7 +21,7 @@ open Aardvark.SceneGraph
 open hum.Model
         
 module Scene =
-
+   
     let createSceneGraph (m : MModel) (ps : PointSet) (boundsToShow : Box3d[]) : ISg =
 
         let data = Lod.OctreeLodData(ps)
@@ -56,11 +56,12 @@ module Scene =
                     do! DefaultSurfaces.vertexColor
                 }
                 |> Sg.uniform "LineWidth" (Mod.constant 5.0)
-                
+       
         let pcsg = 
             Sg.pointCloud data info
                 |> Sg.effect Surfaces.pointsprite
                 |> Sg.uniform "PointSize" m.pointSize
+                |> Sg.uniform "PointColoring" m.coloring
                 //|> Sg.uniform "ViewportSize" win.Sizes TODO
 
         let coordinateCross = 
