@@ -21,15 +21,16 @@ open Aardvark.Base.Incremental
 
 module Lod =
     open hum.Model
+    open System.Threading
     
-    type OctreeILodDataNode( globalCenter : V3d, node : PersistentRef<PointSetNode>, level : int ) =
-        member x.Identifier = node.Value.Id
+    type OctreeILodDataNode(globalCenter : V3d, node : PersistentRef<IPointCloudNode>, level : int ) =
+        member x.Identifier = node.Value.Cell.ToString()
         member x.Node = node.Value :> obj
         member x.Level = level
-        member x.Bounds = node.Value.BoundingBox - globalCenter
-        member x.LocalPointCount = node.Value.LodPointCount
+        member x.Bounds = node.Value.Cell.BoundingBox - globalCenter
+        member x.LocalPointCount = if node.Value.HasLodPositions then int64 node.Value.LodPositions.Value.Length else 0L
         member x.Children = 
-            if node.Value.IsNotLeaf then
+            if node.Value.IsNotLeaf() then
                 let sn = node.Value.Subnodes 
                 let filtered = 
                     sn |> Array.choose ( fun node -> 
@@ -59,7 +60,10 @@ module Lod =
         
         let globalCenter = ps.BoundingBox.Center
         
-        let root = lazy ( OctreeILodDataNode(globalCenter, ps.Root,0) :> ILodDataNode )
+        let rv = ps.Root.Value :> IPointCloudNode
+        let f = Func<string, CancellationToken, IPointCloudNode>(fun _ _ -> rv)
+        let r = PersistentRef<IPointCloudNode>("whatever", f)
+        let root = lazy ( OctreeILodDataNode(globalCenter, r, 0) :> ILodDataNode )
         
         member x.BoundingBox = ps.BoundingBox
 
@@ -69,7 +73,7 @@ module Lod =
 
         member x.GetData (node : ILodDataNode) : Async<Option<IndexedGeometry>> =
             async {
-                let realNode = unbox<PointSetNode> node.Id
+                let realNode = unbox<IPointCloudNode> node.Id
                 let shiftGlobal = realNode.Center - globalCenter
                 
                 let pos = realNode.LodPositions.Value  |> Array.map(fun p -> V4f(V3f(shiftGlobal + (V3d p)), 1.0f))
