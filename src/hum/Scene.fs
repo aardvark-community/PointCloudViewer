@@ -35,6 +35,8 @@ module Scene =
                 Map.ofList [
                     DefaultSemantic.Positions, typeof<V4f>
                     DefaultSemantic.Colors, typeof<C4b>
+                    DefaultSemantic.Normals, typeof<V3f>
+                    DefaultSemantic.Label, typeof<int>
                 ]
             freeze                  = Mod.constant false
             maxReuseRatio           = 0.5

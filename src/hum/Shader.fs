@@ -18,15 +18,20 @@ open Aardvark.Base
 open Aardvark.Base.Rendering
 open FShade
 
+module DefaultSemantic =
+    let Label = Sym.ofString "Label"
+
+type LabelAttribute() = inherit SemanticAttribute(DefaultSemantic.Label.ToString())
 
 type BillboardVertex =
     {
-        [<Position>] position                           : V4d
-        [<Color>] color                                 : V4d
-        [<PointCoord>] texCoord                         : V2d
-        [<SemanticAttribute("ViewPosition")>] viewPos   : V4d
-        [<PointSize>] size                              : float
-        //[<Normal>] label                                : int
+        [<Position>]                            position  : V4d
+        [<Color>]                               color     : V4d
+        [<Normal>]                              normal    : V3d
+        [<PointCoord>]                          texCoord  : V2d
+        [<SemanticAttribute("ViewPosition")>]   viewPos   : V4d
+        [<PointSize>]                           size      : float
+        [<Label>]                               label     : int
     }
 
 module Surfaces = 
@@ -63,8 +68,8 @@ module Surfaces =
                 let nc = 
                     match colorType with
                     | Model.PointColoring.Colors -> v.color
-                    | Model.PointColoring.Labels -> v.color//colorScheme.[v.label]
-                    | Model.PointColoring.Normals -> v.color
+                    | Model.PointColoring.Labels -> colorScheme.[v.label]
+                    | Model.PointColoring.Normals -> V4d(v.normal, 1.0)
                     | _ -> v.color
 
                 return { v with color = nc }
@@ -75,10 +80,11 @@ module Surfaces =
                 return { 
                     position = V4d(v.position.XYZ, 1.0)
                     color = v.color 
-                    //label = v.label
+                    normal = v.normal
                     texCoord = V2d.OO
                     viewPos = v.viewPos
                     size = uniform?PointSize
+                    label = v.label
                 }    
             }
             
@@ -89,10 +95,11 @@ module Surfaces =
                 return {
                     position = uniform.ProjTrafo * viewPos
                     color = v.color
-                    //label = v.label
+                    normal = v.normal
                     texCoord = V2d.OO
                     viewPos = viewPos
                     size = v.size
+                    label = v.label
                 }
             }
 
@@ -126,11 +133,11 @@ module Surfaces =
             } 
 
         [
-            BillboardColoring |> toEffect
             BillboardPosExtract|> toEffect
             DefaultSurfaces.trafo     |> toEffect
             DefaultSurfaces.vertexColor  |> toEffect
             BillboardFragment  |> toEffect
+            BillboardColoring |> toEffect
         ]
 
 

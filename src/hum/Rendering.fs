@@ -77,20 +77,21 @@ module Lod =
                 let shiftGlobal = realNode.Center - globalCenter
                 
                 let pos = realNode.LodPositions.Value  |> Array.map(fun p -> V4f(V3f(shiftGlobal + (V3d p)), 1.0f))
-                //let normals = 
-                //    match realNode.HasNormals with
-                //    | true -> realNode.LodNormals.Value |> Array.map(fun p -> V4f(p, 0.0f))
-                //    | false -> [| |]
+                
+                let normals = 
+                    match realNode.HasLodNormals with
+                    | true -> realNode.LodNormals.Value |> Array.map(fun p -> V3f(p))
+                    | false -> realNode.LodPositions.Value  |> Array.map(fun _ -> V3f.III)
 
-                //let labels =
-                //    match realNode.HasLodClassifications with
-                //    | true -> realNode.LodClassifications.Value |> Array.map (fun c -> int(c))
-                //    | false -> [| |]
+                let labels =
+                    match realNode.HasLodClassifications with
+                    | true -> realNode.LodClassifications.Value |> Array.map (fun c -> int(c))
+                    | false -> realNode.LodPositions.Value  |> Array.map(fun _ -> 0)
         
                 let colors = 
                     match realNode.HasLodColors with
                     | true -> realNode.LodColors.Value
-                    | false -> [| |]
+                    | false -> realNode.LodPositions.Value  |> Array.map(fun _ -> C4b.White)
                     
                 //let col = match realNode.HasLodColors, realNode.HasLodClassifications with
                 //          | true , _ -> realNode.LodColors.Value
@@ -99,11 +100,13 @@ module Lod =
                 
                 let r = 
                     IndexedGeometry(
-                        Mode = IndexedGeometryMode.PointList,
+                        Mode = IndexedGeometryMode.PointList, 
                         IndexedAttributes =
                             SymDict.ofList [
                                 DefaultSemantic.Positions, pos :> Array
+                                DefaultSemantic.Normals, normals :> Array
                                 DefaultSemantic.Colors, colors :> Array
+                                DefaultSemantic.Label, labels :> Array
                             ]
                     )
                 return Some r
