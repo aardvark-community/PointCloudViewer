@@ -28,7 +28,7 @@ module Lod =
         member x.Node = node.Value :> obj
         member x.Level = level
         member x.Bounds = node.Value.Cell.BoundingBox - globalCenter
-        member x.LocalPointCount = if node.Value.HasLodPositions then int64 node.Value.LodPositions.Value.Length else 0L
+        member x.LocalPointCount = if node.Value.HasLodPositions() then int64 (node.Value.GetLodPositions().Value.Length) else 0L
         member x.Children = 
             if node.Value.IsNotLeaf() then
                 let sn = node.Value.Subnodes 
@@ -76,22 +76,22 @@ module Lod =
                 let realNode = unbox<IPointCloudNode> node.Id
                 let shiftGlobal = realNode.Center - globalCenter
                 
-                let pos = realNode.LodPositions.Value  |> Array.map(fun p -> V4f(V3f(shiftGlobal + (V3d p)), 1.0f))
+                let pos = realNode.GetLodPositions().Value  |> Array.map(fun p -> V4f(V3f(shiftGlobal + (V3d p)), 1.0f))
                 
                 let normals = 
-                    match realNode.HasLodNormals with
-                    | true -> realNode.LodNormals.Value |> Array.map(fun p -> V3f(p))
-                    | false -> realNode.LodPositions.Value  |> Array.map(fun _ -> V3f.III)
+                    match realNode.HasLodNormals() with
+                    | true -> realNode.GetLodNormals().Value |> Array.map(fun p -> V3f(p))
+                    | false -> realNode.GetLodPositions().Value  |> Array.map(fun _ -> V3f.III)
 
                 let labels =
-                    match realNode.HasLodClassifications with
-                    | true -> realNode.LodClassifications.Value |> Array.map (fun c -> int(c))
-                    | false -> realNode.LodPositions.Value  |> Array.map(fun _ -> 0)
+                    match realNode.HasLodClassifications() with
+                    | true -> realNode.GetLodClassifications().Value |> Array.map (fun c -> int(c))
+                    | false -> realNode.GetLodPositions().Value  |> Array.map(fun _ -> 0)
         
                 let colors = 
-                    match realNode.HasLodColors with
-                    | true -> realNode.LodColors.Value
-                    | false -> realNode.LodPositions.Value  |> Array.map(fun _ -> C4b.White)
+                    match realNode.HasLodColors() with
+                    | true -> realNode.GetLodColors().Value
+                    | false -> realNode.GetLodPositions().Value  |> Array.map(fun _ -> C4b.White)
                     
                 //let col = match realNode.HasLodColors, realNode.HasLodClassifications with
                 //          | true , _ -> realNode.LodColors.Value
