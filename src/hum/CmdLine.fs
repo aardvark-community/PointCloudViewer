@@ -98,7 +98,63 @@ module CmdLine =
         }
 
         let pss = Mod.init 3.0
-    
+
+        // ---- visualize octree cells ----
+        let octreeSg =
+        
+            let rec getBoxesFromLevel' (maxLevel : int) (currentLevel : int) (boxes : Box3d list) 
+                (n : PointSetNode) =
+                
+                match currentLevel > maxLevel with
+                | true -> boxes
+                | false ->
+                
+                    let boxes = 
+                        match currentLevel = maxLevel with
+                        | true -> List.append [ n.BoundingBoxExact ] boxes
+                        | false -> boxes
+
+                    match n.IsLeaf with
+                    | true -> boxes
+                    | false ->  
+                        n.Subnodes
+                        |> List.ofArray
+                        |> List.where (fun sn ->  sn != null)
+                        |> List.collect ( fun sn -> 
+                            sn.Value |> getBoxesFromLevel' maxLevel (currentLevel + 1) boxes
+                        )
+
+            let getBoxesFromLevel (level : int) (n : PointSetNode) =
+                let boxes = List.empty<Box3d>
+                let bbs = getBoxesFromLevel' level 0 boxes ps.Root.Value
+                bbs |> List.distinct
+                       
+            let level = 3
+            let bbs = getBoxesFromLevel level ps.Root.Value
+            
+            let colors =
+                let r = new Random()
+                Array.init 250 (fun _ -> C4b(r.Next(1,256), r.Next(1,256),r.Next(1,256),1))
+
+            let bbSg = 
+                bbs
+                |> List.mapi (fun i bb -> 
+                    bb 
+                    |> Sg.wireBox' colors.[i % colors.Length]
+                    |> Sg.trafo (Trafo3d.Translation(-ps.BoundingBox.Center) |> Mod.constant)
+                )
+                |> Sg.ofList
+                |> Sg.shader {
+                    do! DefaultSurfaces.trafo
+                    do! DefaultSurfaces.thickLine
+                    do! DefaultSurfaces.vertexColor
+                }
+                |> Sg.uniform "LineWidth" (Mod.constant 4.0)
+
+            bbSg
+            
+        // ---------------------------------------
+
         let bboxSg =
             ps.BoundingBox
                 |> Sg.wireBox' C4b.Red
@@ -174,7 +230,7 @@ module CmdLine =
 
         // scene graph
         let sg = 
-            [pcsg; bboxSg; boundsToShowSg] // coordinateCross
+            [pcsg; bboxSg; boundsToShowSg; (*octreeSg*)] // coordinateCross
                 |> Sg.ofList
                 |> Sg.viewTrafo viewTrafo
                 |> Sg.projTrafo projTrafo

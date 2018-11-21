@@ -46,13 +46,13 @@ module Surfaces =
         let first10Colors = 
             [ 
                 C4b.White.ToC4d().ToV4d();
-                C4b.Blue.ToC4d().ToV4d();
+                C4b.Gray.ToC4d().ToV4d();
                 C4b.Green.ToC4d().ToV4d();
                 C4b.DarkYellow.ToC4d().ToV4d();
                 C4b.Cyan.ToC4d().ToV4d();
                 C4b.Blue.ToC4d().ToV4d();
                 C4b.Red.ToC4d().ToV4d();
-                C4b.Gray.ToC4d().ToV4d();
+                V4i(212, 212, 214, 255).ToV4d();
                 C4b.Magenta.ToC4d().ToV4d();
                 C4b.Yellow.ToC4d().ToV4d();
             ]
