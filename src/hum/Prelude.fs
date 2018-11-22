@@ -68,6 +68,8 @@ module Prelude =
         printfn "                                         <+>/<-> ... camera speed"
         printfn "                                         <P>/<O> ... point size (+/-)"
         printfn "                                         <T>/<R> ... target pixel distance (+/-)"
+        printfn "                                         <C> ... color scheme (colors, classifications, normals)"
+        printfn "                                         <UP>/<DOWN> ... octree level visualization (+/-)"
         printfn ""
         printfn "    download <baseurl> <targetdir>  bulk download of point cloud files"
         printfn "                                      scans webpage at <baseurl> for hrefs to"

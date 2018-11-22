@@ -65,8 +65,10 @@ module CmdLine =
         let win = app.CreateGameWindow(8)
         win.Title <- "hum - a viewer for humongous point clouds"
         
-        let speed = 10.0 |> Mod.init
+        let speed = 19.5 |> Mod.init
         let coloring = Model.PointColoring.Colors |> Mod.init
+
+        let octreeLvl = 0 |> Mod.init
 
         let initialView = CameraView.lookAt V3d.OIO V3d.Zero V3d.OOI
         let view = initialView |> DefaultCameraController.controlWithSpeed speed win.Mouse win.Keyboard win.Time
@@ -100,58 +102,80 @@ module CmdLine =
         let pss = Mod.init 3.0
 
         // ---- visualize octree cells ----
-        let octreeSg =
-        
-            let rec getBoxesFromLevel' (maxLevel : int) (currentLevel : int) (boxes : Box3d list) 
-                (n : PointSetNode) =
-                
-                match currentLevel > maxLevel with
-                | true -> boxes
-                | false ->
-                
-                    let boxes = 
-                        match currentLevel = maxLevel with
-                        | true -> List.append [ n.BoundingBoxExact ] boxes
-                        | false -> boxes
 
-                    match n.IsLeaf with
-                    | true -> boxes
-                    | false ->  
-                        n.Subnodes
-                        |> List.ofArray
-                        |> List.where (fun sn ->  sn != null)
-                        |> List.collect ( fun sn -> 
-                            sn.Value |> getBoxesFromLevel' maxLevel (currentLevel + 1) boxes
-                        )
-
-            let getBoxesFromLevel (level : int) (n : PointSetNode) =
-                let boxes = List.empty<Box3d>
-                let bbs = getBoxesFromLevel' level 0 boxes ps.Root.Value
-                bbs |> List.distinct
-                       
-            let level = 3
-            let bbs = getBoxesFromLevel level ps.Root.Value
+        let rec getClassifications (classifications : byte list) (n : PointSetNode) =
             
-            let colors =
-                let r = new Random()
-                Array.init 250 (fun _ -> C4b(r.Next(1,256), r.Next(1,256),r.Next(1,256),1))
+            let classifications = 
+                match n.HasClassifications with
+                | true -> List.append (n.Classifications.Value |> Array.toList) classifications
+                | false -> classifications
 
-            let bbSg = 
-                bbs
-                |> List.mapi (fun i bb -> 
-                    bb 
-                    |> Sg.wireBox' colors.[i % colors.Length]
-                    |> Sg.trafo (Trafo3d.Translation(-ps.BoundingBox.Center) |> Mod.constant)
-                )
-                |> Sg.ofList
-                |> Sg.shader {
-                    do! DefaultSurfaces.trafo
-                    do! DefaultSurfaces.thickLine
-                    do! DefaultSurfaces.vertexColor
+            match n.IsLeaf with
+            | true -> classifications
+            | false -> 
+                n.Subnodes
+                    |> List.ofArray
+                    |> List.where (fun sn ->  sn != null)
+                    |> List.collect ( fun sn -> 
+                        sn.Value |> getClassifications classifications
+                    )
+        
+        let rec getBoxesFromLevel' (maxLevel : int) (currentLevel : int) (boxes : Box3d list) 
+            (n : PointSetNode) =
+                
+            match currentLevel > maxLevel with
+            | true -> boxes
+            | false ->
+
+                //let classifications = n |> getClassifications List.empty<byte> |> List.length
+                //let points = n.PointCountTree
+            
+                let boxes = 
+                    match currentLevel = maxLevel with
+                    | true -> List.append [ n.BoundingBoxExact ] boxes
+                    | false -> boxes
+
+                match n.IsLeaf with
+                | true -> boxes
+                | false ->  
+                    n.Subnodes
+                    |> List.ofArray
+                    |> List.where (fun sn ->  sn != null)
+                    |> List.collect ( fun sn -> 
+                        sn.Value |> getBoxesFromLevel' maxLevel (currentLevel + 1) boxes
+                    )
+
+        let getBoxesFromLevel (level : int) =
+            getBoxesFromLevel' level 0 List.empty<Box3d>  ps.Root.Value |> List.distinct
+                  
+        let createOctreeSg = 
+
+            let r = new Random()
+            let nextColor () = C4b(r.Next(1,256),r.Next(1,256),r.Next(1,256),1)
+            
+            let bbs = 
+                alist {
+                    let! lvl = octreeLvl
+                    yield! getBoxesFromLevel lvl |> AList.ofList
                 }
-                |> Sg.uniform "LineWidth" (Mod.constant 4.0)
-
-            bbSg
+                
+            bbs
+            |> AList.map ( fun bb ->
+                bb
+                |> Sg.wireBox' (nextColor())
+                //|> Sg.box' (nextColor())
+                |> Sg.trafo (Trafo3d.Translation(-ps.BoundingBox.Center) |> Mod.constant)
+            )
+            |> AList.toASet
+            |> Sg.set
+            |> Sg.shader {
+                do! DefaultSurfaces.trafo
+                do! DefaultSurfaces.thickLine
+                do! DefaultSurfaces.vertexColor
+                //do! DefaultSurfaces.simpleLighting
+            }
+            |> Sg.uniform "LineWidth" (Mod.constant 4.0)
+            
             
         // ---------------------------------------
 
@@ -230,7 +254,7 @@ module CmdLine =
 
         // scene graph
         let sg = 
-            [pcsg; bboxSg; boundsToShowSg; (*octreeSg*)] // coordinateCross
+            [pcsg; (*bboxSg;*) boundsToShowSg; createOctreeSg] // coordinateCross
                 |> Sg.ofList
                 |> Sg.viewTrafo viewTrafo
                 |> Sg.projTrafo projTrafo
@@ -269,6 +293,22 @@ module CmdLine =
                         | _ -> Model.PointColoring.Colors
                 )
                 Log.line "PointColoring: %s" (coloring.Value.ToString())
+
+            | Keys.Up -> 
+                transact ( fun _ -> 
+                    let oldLvl = octreeLvl.Value 
+                    octreeLvl.Value <- oldLvl + 1
+                    Log.line "OctreeLevel: %i" octreeLvl.Value
+                )
+            | Keys.Down -> 
+                transact ( fun _ ->
+                    let oldLvl = octreeLvl.Value 
+                    octreeLvl.Value <- 
+                        match oldLvl = 0 with
+                        | true -> oldLvl
+                        | false -> oldLvl - 1
+                    Log.line "OctreeLevel: %i" octreeLvl.Value
+                )
                 
             | _ -> ()
         )
