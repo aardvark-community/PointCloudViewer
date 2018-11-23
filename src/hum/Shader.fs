@@ -69,7 +69,7 @@ module Surfaces =
                     match colorType with
                     | Model.PointColoring.Colors -> v.color
                     | Model.PointColoring.Labels -> colorScheme.[v.label]
-                    | Model.PointColoring.Normals -> V4d(v.normal, 1.0)
+                    | Model.PointColoring.Normals -> V4d(v.normal.Abs, 1.0)
                     | _ -> v.color
 
                 return { v with color = nc }
