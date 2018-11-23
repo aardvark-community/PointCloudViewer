@@ -1,4 +1,4 @@
-(*
+﻿(*
     Copyright (c) 2018. Attila Szabo, Georg Haaser, Harald Steinlechner, Stefan Maierhofer.
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -68,8 +68,9 @@ module Prelude =
         printfn "                                         <+>/<-> ... camera speed"
         printfn "                                         <P>/<O> ... point size (+/-)"
         printfn "                                         <T>/<R> ... target pixel distance (+/-)"
-        printfn "                                         <C> ... color scheme (colors, classifications, normals)"
-        printfn "                                         <UP>/<DOWN> ... octree level visualization (+/-)"
+        printfn "                                         <C> ....... cycle color scheme"
+        printfn "                                                     (colors, classification, normals)"
+        printfn "                                         <↑>/<↓> ... octree level visualization (+/-)"
         printfn ""
         printfn "    download <baseurl> <targetdir>  bulk download of point cloud files"
         printfn "                                      scans webpage at <baseurl> for hrefs to"
