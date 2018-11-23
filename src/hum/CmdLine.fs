@@ -399,13 +399,18 @@ module CmdLine =
             
         use store = PointCloud.OpenStore(store)
         
-        let cfg =
+        let mutable cfg =
             ImportConfig.Default
                 .WithStorage(store)
                 .WithKey(id)
                 .WithVerbose(true)
                 .WithMaxChunkPointCount(10000000)
                 .WithMinDist(match args.minDist with | None -> 0.0 | Some x -> x)
+                
+        match args.k with
+        | Some k -> let generate (ps : IList<V3d>) = Normals.EstimateNormals(ps.ToArray(), k) :> IList<V3f>
+                    cfg <- cfg.WithEstimateNormals(Func<IList<V3d>, IList<V3f>>(generate))
+        | None -> ()
         
         initPointFileFormats ()
         
@@ -414,13 +419,7 @@ module CmdLine =
             
             // single file, known format
             | false, None   -> let sw = Stopwatch()
-                               sw.Restart()
-                               let chunks = Import.Ply.Chunks(filename, cfg) |> foo
-                               sw.Stop()
-                               printfn "parsing: %A" sw.Elapsed
-                               PointCloud.Chunks(chunks, cfg)
-                               
-                               // PointCloud.Import(filename, cfg)
+                               PointCloud.Import(filename, cfg)
                  
             // single file, custom ascii
             | false, Some f -> let chunks = Import.Ascii.Chunks(filename, f, cfg)
