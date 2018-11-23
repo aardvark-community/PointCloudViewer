@@ -20,9 +20,9 @@ nuget Aardvark.Geometry.PointTree           ~> 4.6.0-prerelease5
 nuget Aardvark.Geometry.PointSet            ~> 4.6.0-prerelease5
 nuget Aardvark.Data.Points.Ascii            ~> 4.6.0-prerelease5
 
-nuget Aardvark.Service                      ~> 4.4.5
-nuget Aardvark.UI                           ~> 4.4.5
-nuget Aardvark.UI.Primitives                ~> 4.4.5
+nuget Aardvark.Service                      ~> 4.4.7 
+nuget Aardvark.UI                           ~> 4.4.7 
+nuget Aardvark.UI.Primitives                ~> 4.4.7
 
 nuget Aardvark.Compiler.DomainTypes.MSBuild ~> 4.2.3
 
