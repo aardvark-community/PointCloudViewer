@@ -29,7 +29,7 @@ nuget Aardvark.Compiler.DomainTypes.MSBuild ~> 4.2.3
 nuget Aardium                               ~> 1.0.18
 
 nuget LASzip                                ~> 0.3.0-prerelease2
-nuget Ply.Net                               ~> 0.2.0-prerelease1
+nuget Ply.Net                               ~> 0.2.0-prerelease3
 nuget Uncodium.Eigensystems                 ~> 1.0.2
 
 group Build
