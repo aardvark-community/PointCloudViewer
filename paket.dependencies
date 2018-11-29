@@ -14,11 +14,11 @@ nuget Aardvark.Application.Slim             ~> 4.6.1
 nuget Aardvark.Application.Slim.GL          ~> 4.6.1
 nuget Aardvark.Application.Slim.Vulkan      ~> 4.6.1
                                             
-nuget Aardvark.Data.E57                     ~> 4.6.0-prerelease6
-nuget Aardvark.Geometry.Normals             ~> 4.6.0-prerelease6
-nuget Aardvark.Geometry.PointTree           ~> 4.6.0-prerelease6
-nuget Aardvark.Geometry.PointSet            ~> 4.6.0-prerelease6
-nuget Aardvark.Data.Points.Ascii            ~> 4.6.0-prerelease6
+nuget Aardvark.Data.E57                     ~> 4.6.0-prerelease8
+nuget Aardvark.Geometry.Normals             ~> 4.6.0-prerelease8
+nuget Aardvark.Geometry.PointTree           ~> 4.6.0-prerelease8
+nuget Aardvark.Geometry.PointSet            ~> 4.6.0-prerelease8
+nuget Aardvark.Data.Points.Ascii            ~> 4.6.0-prerelease8
 
 nuget Aardvark.Service                      ~> 4.4.8 
 nuget Aardvark.UI                           ~> 4.4.8 
