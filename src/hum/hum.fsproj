@@ -16,6 +16,8 @@
   </PropertyGroup>
   <ItemGroup>
 
+    <Compile Include="SceneGraph.fs" />
+
     <Compile Include="Prelude.fs" />
 
     <Compile Include="Args.fs" />

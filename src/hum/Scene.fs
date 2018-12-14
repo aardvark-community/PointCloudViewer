@@ -24,6 +24,7 @@ module Scene =
    
     let createSceneGraph (m : MModel) (ps : PointSet) (boundsToShow : Box3d[]) : ISg =
 
+        let a = Aardvark.Base.Rendering.Supa
         let data = Lod.OctreeLodData(ps)
         let center = ps.BoundingBox.Center
         
@@ -45,7 +46,8 @@ module Scene =
             customView              = None
             customProjection        = None
             boundingBoxSurface      = None
-            progressCallback        = None
+            progressCallback        = Some (System.Action<_>(fun progress -> printfn "%A" progress))
+            normalVisSurface = None
         }
     
         let bboxSg =

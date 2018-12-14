@@ -77,6 +77,15 @@ module CmdLine =
         
         let tpd = Mod.init 1.5
         let rasterizer = tpd |> Mod.map LodData.defaultRasterizeSet
+
+
+        let eff =
+            let effects = [   
+                DefaultSurfaces.trafo  |> toEffect         
+                DefaultSurfaces.constantColor C4f.White |> toEffect
+            ]
+            FShade.Effect.compose effects
+
         
         let info = {
             lodRasterizer           = rasterizer
@@ -95,7 +104,30 @@ module CmdLine =
             customProjection        = None
             boundingBoxSurface      = None
             progressCallback        = None
+            normalVisSurface = Some eff
         }
+
+        let root = data.RootNode()
+
+        let mutable currentSet = HSet.empty
+        let l = obj()
+
+        //let nodes = 
+        //    Mod.custom (fun token -> 
+        //        let rasterizeSet = rasterizer.GetValue token
+        //        let projTrafo = projTrafo.GetValue token
+        //        let viewTrafo = viewTrafo.GetValue token
+        //        let viewportSize = win.Sizes.GetValue token
+        //        // create a FastHull3d for the (extended) camera
+        //        let hull = viewTrafo * projTrafo |> ViewProjection.toFastHull3d
+
+        //        let result = rasterizeSet viewTrafo projTrafo viewportSize hull root
+        //        let set = HSet.ofSeq result
+        //        lock l (fun _ -> 
+        //            let deltas = currentSet.ComputeDelta set
+        //            ()
+        //        )
+        //    )
 
         let pss = Mod.init 3.0
     
